@@ -1,20 +1,20 @@
 #include "WPILib.h"
+#include <iostream>
 
 class Robot: public IterativeRobot
 {
 private:
-	LiveWindow *lw = LiveWindow::GetInstance();
-	SendableChooser *chooser;
-	const std::string autoNameDefault = "Default";
-	const std::string autoNameCustom = "My Auto";
-	std::string autoSelected;
+	Gyro gyro;
+
+	Robot():
+	gyro(0)
+	{}
 
 	void RobotInit()
 	{
-		chooser = new SendableChooser();
-		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
-		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
-		SmartDashboard::PutData("Auto Modes", chooser);
+		gyro.Calibrate()
+
+
 	}
 
 
@@ -29,24 +29,12 @@ private:
 	 */
 	void AutonomousInit()
 	{
-		autoSelected = *((std::string*)chooser->GetSelected());
-		//std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
-		std::cout << "Auto selected: " << autoSelected << std::endl;
 
-		if(autoSelected == autoNameCustom){
-			//Custom Auto goes here
-		} else {
-			//Default Auto goes here
-		}
 	}
 
 	void AutonomousPeriodic()
 	{
-		if(autoSelected == autoNameCustom){
-			//Custom Auto goes here
-		} else {
-			//Default Auto goes here
-		}
+
 	}
 
 	void TeleopInit()
@@ -57,12 +45,15 @@ private:
 
 	void TeleopPeriodic()
 	{
-
+		float gAngle = 0;
+		gAngle = gyro.GetRate();
+		std::cout<<"gyro = ";
+		std::cout<<gAngle;
 	}
 
 	void TestPeriodic()
 	{
-		lw->Run();
+
 	}
 };
 
