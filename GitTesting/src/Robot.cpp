@@ -3,16 +3,15 @@
 
 class Robot: public IterativeRobot
 {
-private:
-	Gyro gyro;
-
+	AnalogGyro gyro;
+public:
 	Robot():
 	gyro(0)
 	{}
 
 	void RobotInit()
 	{
-		gyro.Calibrate()
+		gyro.Calibrate();
 
 
 	}
