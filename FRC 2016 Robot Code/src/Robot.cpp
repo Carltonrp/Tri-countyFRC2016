@@ -16,6 +16,10 @@ class Robot: public IterativeRobot
 	CANTalon driveRightFront;
 	CANTalon driveLeftBack;
 	CANTalon driveRightBack;
+	JoystickButton JoyR;
+	JoystickButton JoyL;
+	DigitalOutput AR;
+	DigitalOutput AL;
 	DoubleSolenoid *Piston = new DoubleSolenoid(0, 1);
 
 public:
@@ -25,7 +29,11 @@ public:
 		driveLeftFront(1),
 		driveRightFront(2),
 		driveLeftBack(3),
-		driveRightBack(4)
+		driveRightBack(4),
+		JoyR(5),
+		JoyL(4),
+		AR(0),
+		AL(1)
 	{}
 private:
 
@@ -92,6 +100,14 @@ private:
 	{
 //		Robotc.ArcadeDrive(driveStick);
 		TankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
+		if (JoyR.get() == 1)
+		{
+			DigitalOutput
+		}
+		if (JoyL.get() == 1)
+		{
+
+		}
 	}
 
 	void TestPeriodic()

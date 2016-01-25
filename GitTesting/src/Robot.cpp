@@ -1,5 +1,6 @@
 #include "WPILib.h"
 #include <iostream>
+#include <AnalogGyro.h>
 
 class Robot: public IterativeRobot
 {
@@ -13,9 +14,7 @@ public:
 	{
 		gyro.Calibrate();
 
-
 	}
-
 
 	/**
 	 * This autonomous (along with the chooser code above) shows how to select between different autonomous modes
@@ -44,10 +43,10 @@ public:
 
 	void TeleopPeriodic()
 	{
-		float gAngle = 0;
-		gAngle = gyro.GetRate();
-		std::cout<<"gyro = ";
-		std::cout<<gAngle;
+		std::cout<<"\ngyro angle =";
+		std::cout<<gyro.GetAngle();
+
+		Wait(0.5);
 	}
 
 	void TestPeriodic()
