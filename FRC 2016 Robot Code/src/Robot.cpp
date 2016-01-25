@@ -4,7 +4,7 @@
 
 
 const float SMOOTH_DRIVE_GAIN		= 0.5;
-const float SMOOTH_DRIVE_DEADZONE	= 0.1;
+const float SMOOTH_DRIVE_DEADZONE	= 0.01;
 
 float drivePowerLeft	= 0;
 float drivePowerRight	= 0;
@@ -88,7 +88,7 @@ private:
 	void TeleopPeriodic()
 	{
 		if ( driveStick.GetTrigger() )	SmoothTankDrive( gyro.GetAngle()/90, driveStick.GetRawAxis(1) );
-		else								SmoothTankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
+		else							SmoothTankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
 	}
 
 	void TestPeriodic()
