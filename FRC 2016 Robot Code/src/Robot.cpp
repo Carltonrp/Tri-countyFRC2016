@@ -1,5 +1,6 @@
 #include "WPILib.h"
 #include <iostream>
+#include <AnalogGyro.h>
 
 
 const float SMOOTH_DRIVE_GAIN		= 0.5;
@@ -16,6 +17,8 @@ class Robot: public IterativeRobot
 	CANTalon driveRightFront;
 	CANTalon driveLeftBack;
 	CANTalon driveRightBack;
+	AnalogGyro gyro;
+
 	JoystickButton JoyR;
 	JoystickButton JoyL;
 	DigitalOutput AR;
@@ -30,8 +33,10 @@ public:
 		driveRightFront(2),
 		driveLeftBack(3),
 		driveRightBack(4),
-		JoyR(5),
-		JoyL(4),
+		gyro(0),
+
+		JoyR(&driveStick,5),
+		JoyL(&driveStick,4),
 		AR(0),
 		AL(1)
 	{}
@@ -40,17 +45,10 @@ private:
 
 
 	LiveWindow *lw = LiveWindow::GetInstance();
-//	SendableChooser *chooser;
-//	const std::string autoNameDefault = "Default";
-//	const std::string autoNameCustom = "My Auto";
-//	std::string autoSelected;
 
 	void RobotInit()
 	{
-//		chooser = new SendableChooser();
-//		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
-//		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
-//		SmartDashboard::PutData("Auto Modes", chooser);
+		gyro.Calibrate();
 	}
 
 
@@ -65,29 +63,20 @@ private:
 	 */
 	void AutonomousInit()
 	{
-//		autoSelected = *((std::string*)chooser->GetSelected());
-//		//std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
-//		std::cout << "Auto selected: " << autoSelected << std::endl;
-//
-//		if(autoSelected == autoNameCustom){
-//			//Custom Auto goes here
-//		} else {
-//			//Default Auto goes here
-//		}
 		Piston->Set(DoubleSolenoid::Value::kOff);
 	}
 
 	void AutonomousPeriodic()
 	{
-//		Robotc.Drive(10,1);
-//		driveLeftBack.Set(100);
-//		std::cout << "Test"/;
+		std::cout<<"\ngyro angle =";
+		std::cout<<gyro.GetAngle();
+		TankDrive(gyro.GetAngle()/90,0);
 
-		Piston->Set(DoubleSolenoid::Value::kForward);
-		Wait(3);
-		Piston->Set(DoubleSolenoid::Value::kReverse);
-		Wait(3);
-		std::cout << "Piston ";
+//		Piston->Set(DoubleSolenoid::Value::kForward);
+//		Wait(3);
+//		Piston->Set(DoubleSolenoid::Value::kReverse);
+//		Wait(3);
+//		std::cout << "Piston ";
 
 	}
 
@@ -98,16 +87,8 @@ private:
 
 	void TeleopPeriodic()
 	{
-//		Robotc.ArcadeDrive(driveStick);
-		TankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
-		if (JoyR.get() == 1)
-		{
-			DigitalOutput
-		}
-		if (JoyL.get() == 1)
-		{
-
-		}
+		if ( driveStick.GetTrigger() )	SmoothTankDrive( gyro.GetAngle()/90, driveStick.GetRawAxis(1) );
+		else								SmoothTankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
 	}
 
 	void TestPeriodic()
@@ -117,8 +98,10 @@ private:
 
 	void Drive( float left , float right )
 	{
+		// set left motors
 		driveLeftFront.Set	(left);
 		driveLeftBack.Set	(left);
+		// set right motors (inverted)
 		driveRightFront.Set	(-right);
 		driveRightBack.Set	(-right);
 	}
