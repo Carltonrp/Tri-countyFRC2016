@@ -1,6 +1,6 @@
 #include "WPILib.h"
 #include <iostream>
-#include <AnalogGyro.h>
+//#include <AnalogGyro.h>
 
 
 const float SMOOTH_DRIVE_GAIN		= 0.5;
@@ -11,6 +11,7 @@ float drivePowerRight	= 0;
 
 class Robot: public IterativeRobot
 {
+	LiveWindow *lw = LiveWindow::GetInstance();
 	RobotDrive Robotc;
 	Joystick driveStick;
 	CANTalon driveLeftFront;
@@ -42,10 +43,13 @@ private:
 
 
 
-	LiveWindow *lw = LiveWindow::GetInstance();
 
 	void RobotInit()
 	{
+		chooser = new SendableChooser();
+		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
+		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
+		SmartDashboard::PutData("Auto Modes", chooser);
 		gyro.Calibrate();
 		AR->Set(Relay::Value::kOff);
 		AL->Set(Relay::Value::kOff);
@@ -67,11 +71,24 @@ private:
 		AR->Set(Relay::Value::kOn);
 		AL->Set(Relay::Value::kOff);
 
-
+		autoSelected = *((std::string*)chooser->GetSelected());
+		std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
+		std::cout << "Auto selected: " << autoSelected << std::endl;
+		if(autoSelected == autoNameCustom){
+			//Custom Auto goes here
+		} else {
+			//Default Auto goes here
+		}
 	}
 
 	void AutonomousPeriodic()
 	{
+		if(autoSelected == autoNameCustom){
+				//Custom Auto goes here
+			} else {
+				//Default Auto goes here
+			}
+
 		std::cout<<"\ngyro angle =";
 		std::cout<<gyro.GetAngle();
 		TankDrive(gyro.GetAngle()/90,0);
