@@ -21,8 +21,8 @@ class Robot: public IterativeRobot
 
 	JoystickButton JoyR;
 	JoystickButton JoyL;
-	DigitalOutput AR;
-	DigitalOutput AL;
+	Relay *AR = new Relay(0);
+	Relay *AL = new Relay(1);
 	DoubleSolenoid *Piston = new DoubleSolenoid(0, 1);
 
 public:
@@ -36,9 +36,7 @@ public:
 		gyro(0),
 
 		JoyR(&driveStick,5),
-		JoyL(&driveStick,4),
-		AR(0),
-		AL(1)
+		JoyL(&driveStick,4)
 	{}
 private:
 
@@ -49,6 +47,8 @@ private:
 	void RobotInit()
 	{
 		gyro.Calibrate();
+		AR->Set(Relay::Value::kOff);
+		AL->Set(Relay::Value::kOff);
 	}
 
 
@@ -64,6 +64,10 @@ private:
 	void AutonomousInit()
 	{
 		Piston->Set(DoubleSolenoid::Value::kOff);
+		AR->Set(Relay::Value::kOn);
+		AL->Set(Relay::Value::kOff);
+
+
 	}
 
 	void AutonomousPeriodic()
@@ -82,6 +86,9 @@ private:
 
 	void TeleopInit()
 	{
+		AL->Set(Relay::Value::kOn);
+		AR->Set(Relay::Value::kOff);
+
 
 	}
 
