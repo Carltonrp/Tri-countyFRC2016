@@ -1,13 +1,29 @@
-#include "WPILib.h"
 #include <iostream>
-//#include <AnalogGyro.h>
+#include <cmath>
+
+#include "WPILib.h"
+#include <AnalogGyro.h>
 
 
-const float SMOOTH_DRIVE_GAIN		= 0.5;
-const float SMOOTH_DRIVE_DEADZONE	= 0.0;
+const double	SMOOTH_DRIVE_P_GAIN		=	0.5;
+const double	SMOOTH_DRIVE_DEADZONE	=	0.01;
+const double	ANGLE_TOLERANCE			=	0.1;
 
-float drivePowerLeft	= 0;
-float drivePowerRight	= 0;
+const double	TURN_P_GAIN				=	1;
+const double	TURN_I_GAIN				=	0.5;
+const double	TURN_D_GAIN				=	5;
+const double	TURN_K					=	0.001;
+
+double	turnP							=	0;
+double	turnI							=	0;
+double	turnD							=	0;
+double	angleDeviation[64]				=	{0};
+int		turnInterval					=	0;
+
+double	drivePower						=	0;
+double	drivePowerLeft					=	0;
+double	drivePowerRight					=	0;
+double	turnPower						=	0;
 
 class Robot: public IterativeRobot
 {
@@ -21,6 +37,7 @@ class Robot: public IterativeRobot
 
 	RobotDrive Robotc;
 	Joystick driveStick;
+	JoystickButton driveThumb;
 	CANTalon driveLeftFront;
 	CANTalon driveRightFront;
 	CANTalon driveLeftBack;
@@ -37,6 +54,7 @@ public:
 	Robot():
 		Robotc(1, 2, 3, 4),
 		driveStick(0),
+		driveThumb( &driveStick , 2 ),
 		driveLeftFront(1),
 		driveRightFront(2),
 		driveLeftBack(3),
@@ -118,53 +136,131 @@ public:
 
 	void TeleopPeriodic()
 	{
-		if ( driveStick.GetTrigger() )
+		std::cout<< "\ngyro angle = ";
+		std::cout<< (int) gyro.GetAngle();
+		std::cout<< "\tP = ";
+		std::cout<< (int) turnP;
+		std::cout<< "\tI = ";
+		std::cout<< (int) turnI;
+		std::cout<< "\tD = ";
+		std::cout<< (int) turnD;
+
+		if ( driveThumb.Get() )
 		{
-			TankDrive( gyro.GetAngle()/90, driveStick.GetRawAxis(1) );
+			Drive( 0 , 0 );
 			gyro.Reset();
+
+			drivePower		=	0;
+			drivePowerLeft	=	0;
+			drivePowerRight	=	0;
+
+			turnPower		=	0;
+			turnPIDReset();
 		}
-		else	TankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
+		else if ( driveStick.GetTrigger() )
+		{
+			KeepAngle( turnPower , driveStick.GetRawAxis(1) );
+		}
+		else
+		{
+			SmoothTankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
+			turnPIDReset();
+		}
 	}
 
 	void TestPeriodic()
 	{
 		lw->Run();
 	}
-private:
 
-	void Drive( float left , float right )
+	void	Drive ( double _left , double _right )
 	{
 		// set left motors
-		driveLeftFront.Set	(left);
-		driveLeftBack.Set	(left);
-		// set right motors (inverted)
-		driveRightFront.Set	(-right);
-		driveRightBack.Set	(-right);
+		driveLeftFront.Set	(_left);
+		driveLeftBack.Set	(_left);
+		// set right motors
+		driveRightFront.Set	(-_right);
+		driveRightBack.Set	(-_right);
 	}
 
-	void SmoothDrive( float left , float right )
+	void	SmoothDrive ( double _left , double _right )
 	{
-		if( abs( left ) <= SMOOTH_DRIVE_DEADZONE && abs( right ) <= SMOOTH_DRIVE_DEADZONE )
+		if( fabs( _left ) <= SMOOTH_DRIVE_DEADZONE && fabs( _right ) <= SMOOTH_DRIVE_DEADZONE )
 		{
 			drivePowerLeft	= 0;
 			drivePowerRight	= 0;
 		}
 		else
 		{
-			drivePowerLeft	+= SMOOTH_DRIVE_GAIN * (	left	- 	drivePowerLeft	);
-			drivePowerRight	+= SMOOTH_DRIVE_GAIN * (	right	- 	drivePowerRight	);
+			drivePowerLeft	+= SMOOTH_DRIVE_P_GAIN * (	_left	- 	drivePowerLeft	);
+			drivePowerRight	+= SMOOTH_DRIVE_P_GAIN * (	_right	- 	drivePowerRight	);
 		}
 		Drive( drivePowerLeft , drivePowerRight );
 	}
 
-	void TankDrive( float x , float y )
+	void	TankDrive ( double _x , double _y )
 	{
-		Drive( -y - x , -y + x );
+		Drive( -_y + _x , -_y - _x );
 	}
 
-	void SmoothTankDrive( float x , float y )
+	void	SmoothTankDrive ( double _x , double _y )
 	{
-		SmoothDrive( -y - x , -y + x );
+		SmoothDrive( -_y + _x , -_y - _x );
+	}
+
+	double	GetAngle ()
+	{
+		return fmod( gyro.GetAngle() - 180 , 360 ) - 180;
+	}
+
+	void	turnPIDReset()
+	{
+		turnP	=	0;
+		turnI	=	0;
+		turnD	=	0;
+		turnInterval	=	0;
+		memset( angleDeviation , 0 , 64 );
+	}
+
+	bool	KeepAngle ( double _targetAngle , double _drive )
+	{
+		// calculate angle deviation
+		double _currentAngleDeviation = _targetAngle - GetAngle();
+
+		// reset I
+		if ( turnI * _currentAngleDeviation < 0 )
+		{
+			turnI = 0;
+			turnInterval = 0;
+			memset( angleDeviation , 0 , 64 );
+		}
+
+		// increment interval
+		if ( turnInterval < 64 )	turnInterval++;
+
+		// calculate PID
+		turnP	=	_currentAngleDeviation;
+		turnI	+=	( _currentAngleDeviation - angleDeviation[63] );
+		turnD	=	-gyro.GetRate();
+
+		// shift angle deviations
+		memmove( angleDeviation + 1 , angleDeviation , 63 );
+
+		// store current angle deviation
+		angleDeviation[0] = _currentAngleDeviation;
+
+		// calculate turn power
+		turnPower	=	TURN_K * ( TURN_P_GAIN * turnP + TURN_I_GAIN * turnI + TURN_D_GAIN * turnD );
+
+		// calculate drive power
+		drivePower	+=	SMOOTH_DRIVE_P_GAIN * (	_drive	- 	drivePower	);
+
+		// drive the robot
+		TankDrive( turnPower , drivePower );
+
+		// return true if angle is within tolerance
+		if ( fabs( _currentAngleDeviation ) <= ANGLE_TOLERANCE ) return true;
+		else return false;
 	}
 };
 
