@@ -12,6 +12,13 @@ float drivePowerRight	= 0;
 class Robot: public IterativeRobot
 {
 	LiveWindow *lw = LiveWindow::GetInstance();
+
+	SendableChooser *chooser;
+	const std::string autoNameDefault = "Default";
+	const std::string autoNameCustom = "Auto1";
+
+	std::string autoSelected;
+
 	RobotDrive Robotc;
 	Joystick driveStick;
 	CANTalon driveLeftFront;
@@ -35,11 +42,10 @@ public:
 		driveLeftBack(3),
 		driveRightBack(4),
 		gyro(0),
-
 		JoyR(&driveStick,5),
-		JoyL(&driveStick,4)
+		JoyL(&driveStick,4),
+		chooser()
 	{}
-private:
 
 
 
@@ -50,6 +56,7 @@ private:
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
+
 		gyro.Calibrate();
 		AR->Set(Relay::Value::kOff);
 		AL->Set(Relay::Value::kOff);
@@ -123,6 +130,7 @@ private:
 	{
 		lw->Run();
 	}
+private:
 
 	void Drive( float left , float right )
 	{
