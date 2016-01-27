@@ -24,6 +24,7 @@ double	drivePower						=	0;
 double	drivePowerLeft					=	0;
 double	drivePowerRight					=	0;
 double	turnPower						=	0;
+double	targetAngle						=	0;
 
 class Robot: public IterativeRobot
 {
@@ -38,6 +39,10 @@ class Robot: public IterativeRobot
 	RobotDrive Robotc;
 	Joystick driveStick;
 	JoystickButton driveThumb;
+	JoystickButton driveThumbLU;
+	JoystickButton driveThumbRU;
+	JoystickButton driveThumbLD;
+	JoystickButton driveThumbRD;
 	CANTalon driveLeftFront;
 	CANTalon driveRightFront;
 	CANTalon driveLeftBack;
@@ -55,6 +60,10 @@ public:
 		Robotc(1, 2, 3, 4),
 		driveStick(0),
 		driveThumb( &driveStick , 2 ),
+		driveThumbLU( &driveStick , 5 ),
+		driveThumbRU( &driveStick , 6 ),
+		driveThumbLD( &driveStick , 3 ),
+		driveThumbRD( &driveStick , 4 ),
 		driveLeftFront(1),
 		driveRightFront(2),
 		driveLeftBack(3),
@@ -145,6 +154,7 @@ public:
 		std::cout<< "\tD = ";
 		std::cout<< (int) turnD;
 
+		// Stop all movement and reset PID controls
 		if ( driveThumb.Get() )
 		{
 			Drive( 0 , 0 );
@@ -157,15 +167,22 @@ public:
 			turnPower		=	0;
 			turnPIDReset();
 		}
+		// Straight drive
 		else if ( driveStick.GetTrigger() )
 		{
 			KeepAngle( turnPower , driveStick.GetRawAxis(1) );
 		}
+		// Normal drive
 		else
 		{
 			SmoothTankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
 			turnPIDReset();
 		}
+//		if ( driveThumbLU.Get() )
+//		{
+//			targetAngle += 45;
+//			while( KeepAngle( targetAngle ) );
+//		}
 	}
 
 	void TestPeriodic()
@@ -239,7 +256,7 @@ public:
 		if ( turnInterval < 64 )	turnInterval++;
 
 		// calculate PID
-		turnP	=	_currentAngleDeviation;
+		turnP	=	fmin( _currentAngleDeviation , 90 );
 		turnI	+=	( _currentAngleDeviation - angleDeviation[63] );
 		turnD	=	-gyro.GetRate();
 
