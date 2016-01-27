@@ -2,7 +2,6 @@
 #include <cmath>
 
 #include "WPILib.h"
-#include <AnalogGyro.h>
 
 
 const double	SMOOTH_DRIVE_P_GAIN		=	0.5;
