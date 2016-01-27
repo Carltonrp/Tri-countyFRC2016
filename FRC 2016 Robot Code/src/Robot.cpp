@@ -1,8 +1,7 @@
 #include <iostream>
 #include <cmath>
-
+#include <unistd.h>
 #include "WPILib.h"
-
 
 const double	SMOOTH_DRIVE_P_GAIN		=	0.5;
 const double	SMOOTH_DRIVE_DEADZONE	=	0.01;
@@ -49,6 +48,9 @@ class Robot: public IterativeRobot
 	Relay *AL = new Relay(1);
 	DoubleSolenoid *Piston = new DoubleSolenoid(0, 1);
 
+	const char *JAVA = "/usr/local/frc/JRE/bin/java";
+	char *GRIP_ARGS[5] = {"java", "-jar", "/home/lvuser/grip.jar", "/home/lvuser/project.grip", NULL };
+
 public:
 	Robot():
 		Robotc(1, 2, 3, 4),
@@ -77,6 +79,14 @@ public:
 		gyro.Calibrate();
 		AR->Set(Relay::Value::kOff);
 		AL->Set(Relay::Value::kOff);
+
+		if (fork() == 0)
+		{
+			if (execv(JAVA, GRIP_ARGS) == -1)
+			{
+				perror("Error running GRIP");
+		    }
+		}
 	}
 
 
@@ -116,6 +126,16 @@ public:
 		std::cout<<"\ngyro angle =";
 		std::cout<<gyro.GetAngle();
 		TankDrive(gyro.GetAngle()/90,0);
+
+		auto grip = NetworkTable::GetTable("grip");
+
+		        /* Get published values from GRIP using NetworkTables */
+		auto areas = grip->GetNumberArray("targets/area", llvm::ArrayRef<double>());
+
+		for (auto area : areas)
+		{
+			std::cout << "Got contour with area=" << area << std::endl;
+		}
 
 //		Piston->Set(DoubleSolenoid::Value::kForward);
 //		Wait(3);
