@@ -164,8 +164,8 @@ public:
 
 	void TeleopPeriodic()
 	{
-		std::cout<< "\ngyro angle = ";
-		std::cout<< (int) gyro.GetAngle();
+		std::cout<< "\nangle = ";
+		std::cout<< (int) GetAngle();
 		std::cout<< "\tP = ";
 		std::cout<< (int) turnP;
 		std::cout<< "\tI = ";
@@ -246,7 +246,7 @@ public:
 
 	double	GetAngle ()
 	{
-		return fmod( gyro.GetAngle() - 180 , 360 ) - 180;
+		return fmodf( gyro.GetAngle() , 360 ) - 180;
 	}
 
 	void	turnPIDReset()
@@ -274,8 +274,12 @@ public:
 		// increment interval
 		if ( turnInterval < 64 )	turnInterval++;
 
+		// limit current angle deviation to [-90,90]
+		if		( _currentAngleDeviation >  90 )	_currentAngleDeviation	=	90;
+		else if	( _currentAngleDeviation < -90 )	_currentAngleDeviation	=	-90;
+
 		// calculate PID
-		turnP	=	fmin( _currentAngleDeviation , 90 );
+		turnP	=	_currentAngleDeviation;
 		turnI	+=	( _currentAngleDeviation - angleDeviation[63] );
 		turnD	=	-gyro.GetRate();
 
