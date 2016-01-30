@@ -41,10 +41,8 @@ class Robot: public IterativeRobot
 	JoystickButton driveThumbRU;
 	JoystickButton driveThumbLD;
 	JoystickButton driveThumbRD;
-	CANTalon driveLeftFront;
-	CANTalon driveRightFront;
-	CANTalon driveLeftBack;
-	CANTalon driveRightBack;
+	CANTalon driveLeft;
+	CANTalon driveRight;
 	AnalogGyro gyro;
 
 	JoystickButton JoyR;
@@ -58,17 +56,15 @@ class Robot: public IterativeRobot
 
 public:
 	Robot():
-		Robotc(1, 2, 3, 4),
+		Robotc(1, 2),
 		driveStick(0),
 		driveThumb( &driveStick , 2 ),
 		driveThumbLU( &driveStick , 5 ),
 		driveThumbRU( &driveStick , 6 ),
 		driveThumbLD( &driveStick , 3 ),
 		driveThumbRD( &driveStick , 4 ),
-		driveLeftFront(1),
-		driveRightFront(2),
-		driveLeftBack(3),
-		driveRightBack(4),
+		driveLeft(1),
+		driveRight(2),
 		gyro(0),
 		JoyR(&driveStick,5),
 		JoyL(&driveStick,4),
@@ -212,11 +208,10 @@ public:
 	void	Drive ( double _left , double _right )
 	{
 		// set left motors
-		driveLeftFront.Set	(_left);
-		driveLeftBack.Set	(_left);
+		driveLeft.Set	(_left);
+
 		// set right motors
-		driveRightFront.Set	(-_right);
-		driveRightBack.Set	(-_right);
+		driveRight.Set	(-_right);
 	}
 
 	void	SmoothDrive ( double _left , double _right )
