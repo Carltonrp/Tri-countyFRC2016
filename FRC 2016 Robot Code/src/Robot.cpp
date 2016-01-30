@@ -9,7 +9,7 @@ const double	ANGLE_TOLERANCE			=	0.1;
 
 const double	TURN_P_GAIN				=	1;
 const double	TURN_I_GAIN				=	0.5;
-const double	TURN_D_GAIN				=	5;
+const double	TURN_D_GAIN				=	6;
 const double	TURN_K					=	0.001;
 
 double	turnP							=	0;
@@ -41,8 +41,10 @@ class Robot: public IterativeRobot
 	JoystickButton driveThumbRU;
 	JoystickButton driveThumbLD;
 	JoystickButton driveThumbRD;
-	CANTalon driveLeft;
-	CANTalon driveRight;
+	CANTalon driveLeftFront;
+	CANTalon driveRightFront;
+	CANTalon driveLeftBack;
+	CANTalon driveRightBack;
 	AnalogGyro gyro;
 
 	JoystickButton JoyR;
@@ -56,15 +58,17 @@ class Robot: public IterativeRobot
 
 public:
 	Robot():
-		Robotc(1, 2),
+		Robotc(1, 2, 3, 4),
 		driveStick(0),
 		driveThumb( &driveStick , 2 ),
 		driveThumbLU( &driveStick , 5 ),
 		driveThumbRU( &driveStick , 6 ),
 		driveThumbLD( &driveStick , 3 ),
 		driveThumbRD( &driveStick , 4 ),
-		driveLeft(1),
-		driveRight(2),
+		driveLeftFront(1),
+		driveRightFront(2),
+		driveLeftBack(3),
+		driveRightBack(4),
 		gyro(0),
 		JoyR(&driveStick,5),
 		JoyL(&driveStick,4),
@@ -160,14 +164,14 @@ public:
 
 	void TeleopPeriodic()
 	{
-		std::cout<< "\ngyro angle = ";
-		std::cout<< (int) gyro.GetAngle();
-		std::cout<< "\tP = ";
-		std::cout<< (int) turnP;
-		std::cout<< "\tI = ";
-		std::cout<< (int) turnI;
-		std::cout<< "\tD = ";
-		std::cout<< (int) turnD;
+//		std::cout<< "\nangle = ";
+//		std::cout<< (int) GetAngle();
+//		std::cout<< "\tP = ";
+//		std::cout<< (int) turnP;
+//		std::cout<< "\tI = ";
+//		std::cout<< (int) turnI;
+//		std::cout<< "\tD = ";
+//		std::cout<< (int) turnD;
 
 		// Stop all movement and reset PID controls
 		if ( driveThumb.Get() )
@@ -182,10 +186,53 @@ public:
 			turnPower		=	0;
 			turnPIDReset();
 		}
+
+		std::cout<< "\nTarget Angle: ";
+		std::cout<< (int) targetAngle;
+		if ( driveStick.GetPOV() != -1 ) {
+			targetAngle = ModAngle( -driveStick.GetPOV() );
+		}
+
 		// Straight drive
 		else if ( driveStick.GetTrigger() )
 		{
-			KeepAngle( turnPower , driveStick.GetRawAxis(1) );
+
+//			switch ( (int) driveStick.GetPOV() / 45 )
+//			{
+//				// north
+//				case (0) :
+//					std::cout<< "\n0";
+//				break;
+//				// north east
+//				case (1) :
+//					std::cout<< "\n1";
+//				break;
+//				// east
+//				case (2) :
+//					std::cout<< "\n2";
+//				break;
+//				// south east
+//				case (3) :
+//					std::cout<< "\n3";
+//				break;
+//				// south
+//				case (4) :
+//					std::cout<< "\n4";
+//				break;
+//				// south west
+//				case (5) :
+//					std::cout<< "\n5";
+//				break;
+//				// west
+//				case (6) :
+//					std::cout<< "\n6";
+//				break;
+//				// north west
+//				case (7) :
+//					std::cout<< "\n7";
+//				break;
+//			}
+			KeepAngle( targetAngle , driveStick.GetRawAxis(1) );
 		}
 		// Normal drive
 		else
@@ -193,11 +240,7 @@ public:
 			SmoothTankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
 			turnPIDReset();
 		}
-//		if ( driveThumbLU.Get() )
-//		{
-//			targetAngle += 45;
-//			while( KeepAngle( targetAngle ) );
-//		}
+
 	}
 
 	void TestPeriodic()
@@ -208,10 +251,11 @@ public:
 	void	Drive ( double _left , double _right )
 	{
 		// set left motors
-		driveLeft.Set	(_left);
-
+		driveLeftFront.Set	(_left);
+		driveLeftBack.Set	(_left);
 		// set right motors
-		driveRight.Set	(-_right);
+		driveRightFront.Set	(-_right);
+		driveRightBack.Set	(-_right);
 	}
 
 	void	SmoothDrive ( double _left , double _right )
@@ -239,9 +283,35 @@ public:
 		SmoothDrive( -_y + _x , -_y - _x );
 	}
 
+	double	ModAngle ( double angle )
+	{
+		angle = angle - 360 * floorf( ( angle - 180 ) / 360 ) - 360;
+		if ( angle == -180 ) angle = 180;
+		return angle;
+	}
+
 	double	GetAngle ()
 	{
-		return fmod( gyro.GetAngle() - 180 , 360 ) - 180;
+		return ModAngle( gyro.GetAngle() );
+	}
+
+	double	AngularDifference ( double left , double right )
+	{
+		left = ModAngle( left );
+		right = ModAngle( right );
+		double a = abs( ModAngle( left - right ) - 360 );
+		double b = abs( ModAngle( left - right ) + 360 );
+		double c = abs( ModAngle( left - right ) );
+		if ( a < b && a < c ) {
+			return ModAngle( left - right ) - 360;
+		}
+		if ( b < a && b < c ) {
+			return ModAngle( left - right ) + 360;
+		}
+		else {
+			return ModAngle( left - right );
+		}
+		return ModAngle( gyro.GetAngle() );
 	}
 
 	void	turnPIDReset()
@@ -256,7 +326,7 @@ public:
 	bool	KeepAngle ( double _targetAngle , double _drive )
 	{
 		// calculate angle deviation
-		double _currentAngleDeviation = _targetAngle - GetAngle();
+		double _currentAngleDeviation = AngularDifference( _targetAngle , GetAngle() );
 
 		// reset I
 		if ( turnI * _currentAngleDeviation < 0 )
@@ -269,10 +339,18 @@ public:
 		// increment interval
 		if ( turnInterval < 64 )	turnInterval++;
 
+		// limit current angle deviation to [-90,90]
+		if		( _currentAngleDeviation >  45 )	_currentAngleDeviation	=	45;
+		else if	( _currentAngleDeviation < -45 )	_currentAngleDeviation	=	-45;
+
 		// calculate PID
-		turnP	=	fmin( _currentAngleDeviation , 90 );
+		turnP	=	_currentAngleDeviation;
 		turnI	+=	( _currentAngleDeviation - angleDeviation[63] );
 		turnD	=	-gyro.GetRate();
+
+		// limit integral
+		if		( turnI >  720 )	turnI	=	720;
+		else if	( turnI < -720 )	turnI	=	-720;
 
 		// shift angle deviations
 		memmove( angleDeviation + 1 , angleDeviation , 63 );
