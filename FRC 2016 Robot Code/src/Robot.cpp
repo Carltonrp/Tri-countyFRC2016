@@ -99,11 +99,11 @@ public:
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
 
-		gyro.Calibrate();
-		AR->Set(Relay::Value::kOff);
+		gyro.Calibrate();						//Setting the gyroscope to zero wherever it is
+		AR->Set(Relay::Value::kOff);			//Pneumatic left and right set to a home position
 		AL->Set(Relay::Value::kOff);
 
-		if (fork() == 0)
+		if (fork() == 0)						//Creating process for grip and testing if it fails
 		{
 			if (execv(JAVA, GRIP_ARGS) == -1)
 			{
