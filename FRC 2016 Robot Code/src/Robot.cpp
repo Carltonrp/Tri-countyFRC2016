@@ -7,15 +7,26 @@ const double	SMOOTH_DRIVE_P_GAIN		=	0.5;
 const double	SMOOTH_DRIVE_DEADZONE	=	0.01;
 const double	ANGLE_TOLERANCE			=	0.1;
 
+const double	DRIVE_P_GAIN			=	0.5;
+const double	DRIVE_I_GAIN			=	0.1;
+const double	DRIVE_D_GAIN			=	0.2;
+const double	DRIVE_K					=	1.0;
+
 const double	TURN_P_GAIN				=	1;
 const double	TURN_I_GAIN				=	0.5;
 const double	TURN_D_GAIN				=	6;
 const double	TURN_K					=	0.001;
 
+double speedLeft						=	0;
+double speedRight						=	0;
+
+double	driveP							=	0;
+double	driveI							=	0;
+double	driveD							=	0;
+
 double	turnP							=	0;
 double	turnI							=	0;
 double	turnD							=	0;
-double	angleDeviation[64]				=	{0};
 int		turnInterval					=	0;
 
 double	drivePower						=	0;
@@ -34,6 +45,7 @@ class Robot: public IterativeRobot
 
 	std::string autoSelected;
 
+	Timer timer;
 	RobotDrive Robotc;
 	Joystick driveStick;
 	JoystickButton driveThumb;
@@ -45,6 +57,8 @@ class Robot: public IterativeRobot
 	CANTalon driveRight;
 	CANTalon arm;
 	AnalogGyro gyro;
+	AnalogAccelerometer accelLeft;
+	AnalogAccelerometer accelRight;
 
 	JoystickButton JoyR;
 	JoystickButton JoyL;
@@ -68,6 +82,8 @@ public:
 		driveRight(2),
 		arm(3),
 		gyro(0),
+		accelLeft(1),
+		accelRight(2),
 		JoyR(&driveStick,5),
 		JoyL(&driveStick,4),
 		chooser()
@@ -150,13 +166,15 @@ public:
 //		Wait(3);
 //		std::cout << "Piston ";
 
+		std::cout<< "\nangle = ";
+		std::cout<< gyro.GetAngle();
+
 	}
 
 	void TeleopInit()
 	{
 		AL->Set(Relay::Value::kOn);
 		AR->Set(Relay::Value::kOff);
-
 
 	}
 
@@ -223,6 +241,8 @@ public:
 		lw->Run();
 	}
 
+	/* DRIVE FUNCTIONS */
+
 	void	Drive ( double _left , double _right )
 	{
 		// set left motors
@@ -248,13 +268,46 @@ public:
 
 	void	TankDrive ( double _x , double _y )
 	{
-		Drive( -_y + _x , -_y - _x );
+		Drive( _y + _x , _y - _x );
 	}
 
 	void	SmoothTankDrive ( double _x , double _y )
 	{
-		SmoothDrive( -_y + _x , -_y - _x );
+		SmoothDrive( _y + _x , _y - _x );
 	}
+
+	double	GetSpeed ()
+	{
+		speedLeft	+=	accelLeft.GetAcceleration() / timer.Get();
+		speedRight	+=	accelRight.GetAcceleration() / timer.Get();
+		timer.Reset();
+		return	( speedLeft + speedRight ) / 2;
+	}
+
+	double	GetSpeedLeft ()
+	{
+		GetSpeed();
+		return	speedLeft;
+	}
+
+	double	GetSpeedRight ()
+	{
+		GetSpeed();
+		return	speedRight;
+	}
+
+	void	PIDTankDrive ( double _x , double _y ) {
+		double	_currentY			=	GetSpeed();
+		double	_currentX			=	( speedLeft - speedRight ) / _currentY;
+		double	_currentDeviation	=	_currentX - _x;
+		driveP	=	_currentDeviation;
+		driveI	+=	_currentDeviation;
+		driveD	=	-_currentX;
+		turnPower = DRIVE_P_GAIN * driveP + DRIVE_I_GAIN * driveI + DRIVE_D_GAIN * driveD;
+		Drive( turnPower , _y );
+	}
+
+	/* GYRO FUNCTIONS */
 
 	double	ModAngle ( double angle )
 	{
@@ -281,11 +334,10 @@ public:
 
 	void	TurnPIDReset()
 	{
-		turnP	=	0;
-		turnI	=	0;
-		turnD	=	0;
+		turnP			=	0;
+		turnI			=	0;
+		turnD			=	0;
 		turnInterval	=	0;
-		memset( angleDeviation , 0 , 64 );
 	}
 
 	bool	KeepAngle ( double _targetAngle , double _drive )
@@ -293,38 +345,20 @@ public:
 		// calculate angle deviation
 		double _currentAngleDeviation = AngularDifference( GetAngle() , _targetAngle );
 
-		// reset I
-		if ( turnI * _currentAngleDeviation < 0 )
-		{
-			turnI = 0;
-			turnInterval = 0;
-			memset( angleDeviation , 0 , 64 );
-		}
-
 		// increment interval
-		if ( turnInterval < 64 )	turnInterval++;
-
-		// limit current angle deviation to [-90,90]
-		if		( _currentAngleDeviation >  45 )	_currentAngleDeviation	=	45;
-		else if	( _currentAngleDeviation < -45 )	_currentAngleDeviation	=	-45;
+		turnInterval++;
 
 		// calculate PID
 		turnP	=	_currentAngleDeviation;
-		turnI	+=	( _currentAngleDeviation - angleDeviation[63] );
+		turnI	+=	_currentAngleDeviation;
 		turnD	=	-gyro.GetRate();
-
-		// limit integral
-		if		( turnI >  720 )	turnI	=	720;
-		else if	( turnI < -720 )	turnI	=	-720;
-
-		// shift angle deviations
-		memmove( angleDeviation + 1 , angleDeviation , 63 );
-
-		// store current angle deviation
-		angleDeviation[0] = _currentAngleDeviation;
 
 		// calculate turn power
 		turnPower	=	TURN_K * ( TURN_P_GAIN * turnP + TURN_I_GAIN * turnI + TURN_D_GAIN * turnD );
+
+		// limit turnPower to [-1,+1]
+		if		( turnPower > +1 )	turnPower	=	+1;
+		else if	( turnPower < -1 )	turnPower	=	-1;
 
 		// calculate drive power
 		drivePower	+=	SMOOTH_DRIVE_P_GAIN * (	_drive	- 	drivePower	);
