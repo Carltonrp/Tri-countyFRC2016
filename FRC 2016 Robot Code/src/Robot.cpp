@@ -42,6 +42,10 @@ class Robot: public IterativeRobot
 	SendableChooser *chooser;
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "Auto1";
+	const std::string autoNameCustom = "Auto2";
+	const std::string autoNameCustom = "Auto3";
+	const std::string autoNameCustom = "Auto4";
+	const std::string autoNameCustom = "Auto5";
 
 	std::string autoSelected;
 
@@ -90,12 +94,13 @@ public:
 	{}
 
 
-
-
 	void RobotInit()
 	{
 		chooser = new SendableChooser();
 		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
+		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
+		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
+		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		chooser->AddObject(autoNameCustom, (void*)&autoNameCustom);
 		SmartDashboard::PutData("Auto Modes", chooser);
 
@@ -244,132 +249,132 @@ public:
 	/* DRIVE FUNCTIONS */
 
 	void	Drive ( double _left , double _right )
-	{
-		// set left motors
-		driveLeft.Set	(_left);
-		// set right motors
-		driveRight.Set	(-_right);
-	}
-
-	void	SmoothDrive ( double _left , double _right )
-	{
-		if( fabs( _left ) <= SMOOTH_DRIVE_DEADZONE && fabs( _right ) <= SMOOTH_DRIVE_DEADZONE )
 		{
-			drivePowerLeft	= 0;
-			drivePowerRight	= 0;
+			// set left motors
+			driveLeft.Set	(_left);
+			// set right motors
+			driveRight.Set	(-_right);
 		}
-		else
+
+		void	SmoothDrive ( double _left , double _right )
 		{
-			drivePowerLeft	+= SMOOTH_DRIVE_P_GAIN * (	_left	- 	drivePowerLeft	);
-			drivePowerRight	+= SMOOTH_DRIVE_P_GAIN * (	_right	- 	drivePowerRight	);
+			if( fabs( _left ) <= SMOOTH_DRIVE_DEADZONE && fabs( _right ) <= SMOOTH_DRIVE_DEADZONE )
+			{
+				drivePowerLeft	= 0;
+				drivePowerRight	= 0;
+			}
+			else
+			{
+				drivePowerLeft	+= SMOOTH_DRIVE_P_GAIN * (	_left	- 	drivePowerLeft	);
+				drivePowerRight	+= SMOOTH_DRIVE_P_GAIN * (	_right	- 	drivePowerRight	);
+			}
+			Drive( drivePowerLeft , drivePowerRight );
 		}
-		Drive( drivePowerLeft , drivePowerRight );
-	}
 
-	void	TankDrive ( double _x , double _y )
-	{
-		Drive( _y + _x , _y - _x );
-	}
+		void	TankDrive ( double _x , double _y )
+		{
+			Drive( _y + _x , _y - _x );
+		}
 
-	void	SmoothTankDrive ( double _x , double _y )
-	{
-		SmoothDrive( _y + _x , _y - _x );
-	}
+		void	SmoothTankDrive ( double _x , double _y )
+		{
+			SmoothDrive( _y + _x , _y - _x );
+		}
 
-	double	GetSpeed ()
-	{
-		speedLeft	+=	accelLeft.GetAcceleration() / timer.Get();
-		speedRight	+=	accelRight.GetAcceleration() / timer.Get();
-		timer.Reset();
-		return	( speedLeft + speedRight ) / 2;
-	}
+		double	GetSpeed ()
+		{
+			speedLeft	+=	accelLeft.GetAcceleration() / timer.Get();
+			speedRight	+=	accelRight.GetAcceleration() / timer.Get();
+			timer.Reset();
+			return	( speedLeft + speedRight ) / 2;
+		}
 
-	double	GetSpeedLeft ()
-	{
-		GetSpeed();
-		return	speedLeft;
-	}
+		double	GetSpeedLeft ()
+		{
+			GetSpeed();
+			return	speedLeft;
+		}
 
-	double	GetSpeedRight ()
-	{
-		GetSpeed();
-		return	speedRight;
-	}
+		double	GetSpeedRight ()
+		{
+			GetSpeed();
+			return	speedRight;
+		}
 
-	void	PIDTankDrive ( double _x , double _y ) {
-		double	_currentY			=	GetSpeed();
-		double	_currentX			=	( speedLeft - speedRight ) / _currentY;
-		double	_currentDeviation	=	_currentX - _x;
-		driveP	=	_currentDeviation;
-		driveI	+=	_currentDeviation;
-		driveD	=	-_currentX;
-		turnPower = DRIVE_P_GAIN * driveP + DRIVE_I_GAIN * driveI + DRIVE_D_GAIN * driveD;
-		Drive( turnPower , _y );
-	}
+		void	PIDTankDrive ( double _x , double _y ) {
+			double	_currentY			=	GetSpeed();
+			double	_currentX			=	( speedLeft - speedRight ) / _currentY;
+			double	_currentDeviation	=	_currentX - _x;
+			driveP	=	_currentDeviation;
+			driveI	+=	_currentDeviation;
+			driveD	=	-_currentX;
+			turnPower = DRIVE_P_GAIN * driveP + DRIVE_I_GAIN * driveI + DRIVE_D_GAIN * driveD;
+			Drive( turnPower , _y );
+		}
 
-	/* GYRO FUNCTIONS */
+		/* GYRO FUNCTIONS */
 
-	double	ModAngle ( double angle )
-	{
-		angle = angle - 360 * floorf( ( angle - 180 ) / 360 ) - 360;
-		if ( angle == -180 ) angle = 180;
-		return angle;
-	}
+		double	ModAngle ( double angle )
+		{
+			angle = angle - 360 * floorf( ( angle - 180 ) / 360 ) - 360;
+			if ( angle == -180 ) angle = 180;
+			return angle;
+		}
 
-	double	GetAngle ()
-	{
-		return ModAngle( gyro.GetAngle() );
-	}
+		double	GetAngle ()
+		{
+			return ModAngle( gyro.GetAngle() );
+		}
 
-	double	AngularDifference ( double left , double right )
-	{
-		std::cout<<"\n";
-		std::cout<<left;
-		std::cout<<"-";
-		std::cout<<right;
-		std::cout<<"=";
-		std::cout<<ModAngle( left - right );
-		return ModAngle( left - right );
-	}
+		double	AngularDifference ( double left , double right )
+		{
+			std::cout<<"\n";
+			std::cout<<left;
+			std::cout<<"-";
+			std::cout<<right;
+			std::cout<<"=";
+			std::cout<<ModAngle( left - right );
+			return ModAngle( left - right );
+		}
 
-	void	TurnPIDReset()
-	{
-		turnP			=	0;
-		turnI			=	0;
-		turnD			=	0;
-		turnInterval	=	0;
-	}
+		void	TurnPIDReset()
+		{
+			turnP			=	0;
+			turnI			=	0;
+			turnD			=	0;
+			turnInterval	=	0;
+		}
 
-	bool	KeepAngle ( double _targetAngle , double _drive )
-	{
-		// calculate angle deviation
-		double _currentAngleDeviation = AngularDifference( GetAngle() , _targetAngle );
+		bool	KeepAngle ( double _targetAngle , double _drive )
+		{
+			// calculate angle deviation
+			double _currentAngleDeviation = AngularDifference( GetAngle() , _targetAngle );
 
-		// increment interval
-		turnInterval++;
+			// increment interval
+			turnInterval++;
 
-		// calculate PID
-		turnP	=	_currentAngleDeviation;
-		turnI	+=	_currentAngleDeviation;
-		turnD	=	-gyro.GetRate();
+			// calculate PID
+			turnP	=	_currentAngleDeviation;
+			turnI	+=	_currentAngleDeviation;
+			turnD	=	-gyro.GetRate();
 
-		// calculate turn power
-		turnPower	=	TURN_K * ( TURN_P_GAIN * turnP + TURN_I_GAIN * turnI + TURN_D_GAIN * turnD );
+			// calculate turn power
+			turnPower	=	TURN_K * ( TURN_P_GAIN * turnP + TURN_I_GAIN * turnI + TURN_D_GAIN * turnD );
 
-		// limit turnPower to [-1,+1]
-		if		( turnPower > +1 )	turnPower	=	+1;
-		else if	( turnPower < -1 )	turnPower	=	-1;
+			// limit turnPower to [-1,+1]
+			if		( turnPower > +1 )	turnPower	=	+1;
+			else if	( turnPower < -1 )	turnPower	=	-1;
 
-		// calculate drive power
-		drivePower	+=	SMOOTH_DRIVE_P_GAIN * (	_drive	- 	drivePower	);
+			// calculate drive power
+			drivePower	+=	SMOOTH_DRIVE_P_GAIN * (	_drive	- 	drivePower	);
 
-		// drive the robot
-		TankDrive( turnPower , drivePower );
+			// drive the robot
+			TankDrive( turnPower , drivePower );
 
-		// return true if angle is within tolerance
-		if ( fabs( _currentAngleDeviation ) <= ANGLE_TOLERANCE ) return true;
-		else return false;
-	}
+			// return true if angle is within tolerance
+			if ( fabs( _currentAngleDeviation ) <= ANGLE_TOLERANCE ) return true;
+			else return false;
+		}
 };
 
 START_ROBOT_CLASS(Robot)
