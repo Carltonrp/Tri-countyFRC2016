@@ -149,19 +149,19 @@ public:
 		{
 						//Custom Auto goes here
 		}
-		if(autoSelected == autoNameCustom1)
+		else if(autoSelected == autoNameCustom1)
 		{
 
 		}
-		if(autoSelected == autoNameCustom2)
+		else if(autoSelected == autoNameCustom2)
 		{
 
 		}
-		if(autoSelected == autoNameCustom3)
+		else if(autoSelected == autoNameCustom3)
 		{
 
 		}
-		if(autoSelected == autoNameCustom4)
+		else if(autoSelected == autoNameCustom4)
 		{
 
 		}
@@ -179,19 +179,19 @@ public:
 		{
 			Drive(0,0);
 		}
-		if(autoSelected == autoNameCustom1)
+		else if(autoSelected == autoNameCustom1)
 		{
 
 		}
-		if(autoSelected == autoNameCustom2)
+		else if(autoSelected == autoNameCustom2)
 		{
 
 		}
-		if(autoSelected == autoNameCustom3)
+		else if(autoSelected == autoNameCustom3)
 		{
 
 		}
-		if(autoSelected == autoNameCustom4)
+		else if(autoSelected == autoNameCustom4)
 		{
 
 		}
