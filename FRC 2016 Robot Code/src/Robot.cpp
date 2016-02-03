@@ -2,6 +2,7 @@
 #include <cmath>
 #include <unistd.h>
 #include "WPILib.h"
+#include "Timer.h"
 
 const double	SMOOTH_DRIVE_P_GAIN		=	0.5;
 const double	SMOOTH_DRIVE_DEADZONE	=	0.01;
@@ -35,17 +36,20 @@ double	drivePowerRight					=	0;
 double	turnPower						=	0;
 double	targetAngle						=	0;
 
+double times;
+
+
 class Robot: public IterativeRobot
 {
 	LiveWindow *lw = LiveWindow::GetInstance();
 
 	SendableChooser *chooser;
 	const std::string autoNameDefault = "Default";
-	const std::string autoNameCustom = "Auto1";
-	const std::string autoNameCustom = "Auto2";
-	const std::string autoNameCustom = "Auto3";
-	const std::string autoNameCustom = "Auto4";
-	const std::string autoNameCustom = "Auto5";
+	const std::string autoNameCustom0 = "Auto1";
+	const std::string autoNameCustom1 = "Auto2";
+	const std::string autoNameCustom2 = "Auto3";
+	const std::string autoNameCustom3 = "Auto4";
+	const std::string autoNameCustom4 = "Auto5";
 
 	std::string autoSelected;
 
@@ -110,6 +114,10 @@ public:
 				perror("Error running GRIP");
 		    }
 		}
+
+		timer.Stop();
+		timer.Reset();
+
 	}
 
 
@@ -136,19 +144,42 @@ public:
 		} else {
 			//Default Auto goes here
 		}
+		timer.Start();
 	}
 
 	void AutonomousPeriodic()
 	{
-		if(autoSelected == autoNameCustom){
+		times = timer.Get();
+		if(autoSelected == autoNameCustom)
+		{
 				//Custom Auto goes here
-			} else {
-				//Default Auto goes here
+		}
+		else
+		{
+		//Default Auto goes here
+			std::cout<<"/n Time =";
+			std::cout<<timer.Get();
+
+			if (times <= 5)
+			{
+				driveLeft.Set(0.2);
+				driveRight.Set(-0.2);
 			}
+			else if ((times <= 10) && (times > 5))
+			{
+				driveLeft.Set(-0.2);
+				driveRight.Set(0.2);
+			}
+			else
+			{
+				timer.Reset();
+				timer.Start();
+			}
+		}
 
 		std::cout<<"\ngyro angle =";
 		std::cout<<gyro.GetAngle();
-		TankDrive(gyro.GetAngle()/90,0);
+//		TankDrive(gyro.GetAngle()/90,0);
 
 		auto grip = NetworkTable::GetTable("grip");
 
@@ -159,6 +190,7 @@ public:
 		{
 			std::cout << "Got contour with area=" << area << std::endl;
 		}
+
 
 //		Piston->Set(DoubleSolenoid::Value::kForward);
 //		Wait(3);
