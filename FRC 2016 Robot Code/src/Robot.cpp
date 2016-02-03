@@ -57,8 +57,6 @@ class Robot: public IterativeRobot
 	CANTalon driveRight;
 	CANTalon arm;
 	AnalogGyro gyro;
-	AnalogAccelerometer accelLeft;
-	AnalogAccelerometer accelRight;
 
 	JoystickButton JoyR;
 	JoystickButton JoyL;
@@ -82,8 +80,6 @@ public:
 		driveRight(2),
 		arm(3),
 		gyro(0),
-		accelLeft(1),
-		accelRight(2),
 		JoyR(&driveStick,5),
 		JoyL(&driveStick,4),
 		chooser()
@@ -246,9 +242,9 @@ public:
 	void	Drive ( double _left , double _right )
 	{
 		// set left motors
-		driveLeft.Set	(_left);
+		driveLeft.Set	(-_left);
 		// set right motors
-		driveRight.Set	(-_right);
+		driveRight.Set	(_right);
 	}
 
 	void	SmoothDrive ( double _left , double _right )
@@ -268,43 +264,12 @@ public:
 
 	void	TankDrive ( double _x , double _y )
 	{
-		Drive( _y + _x , _y - _x );
+		Drive( _y - _x , _y + _x );
 	}
 
 	void	SmoothTankDrive ( double _x , double _y )
 	{
-		SmoothDrive( _y + _x , _y - _x );
-	}
-
-	double	GetSpeed ()
-	{
-		speedLeft	+=	accelLeft.GetAcceleration() / timer.Get();
-		speedRight	+=	accelRight.GetAcceleration() / timer.Get();
-		timer.Reset();
-		return	( speedLeft + speedRight ) / 2;
-	}
-
-	double	GetSpeedLeft ()
-	{
-		GetSpeed();
-		return	speedLeft;
-	}
-
-	double	GetSpeedRight ()
-	{
-		GetSpeed();
-		return	speedRight;
-	}
-
-	void	PIDTankDrive ( double _x , double _y ) {
-		double	_currentY			=	GetSpeed();
-		double	_currentX			=	( speedLeft - speedRight ) / _currentY;
-		double	_currentDeviation	=	_currentX - _x;
-		driveP	=	_currentDeviation;
-		driveI	+=	_currentDeviation;
-		driveD	=	-_currentX;
-		turnPower = DRIVE_P_GAIN * driveP + DRIVE_I_GAIN * driveI + DRIVE_D_GAIN * driveD;
-		Drive( turnPower , _y );
+		SmoothDrive( _y - _x , _y + _x );
 	}
 
 	/* GYRO FUNCTIONS */
