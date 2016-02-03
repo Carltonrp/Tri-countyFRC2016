@@ -45,11 +45,20 @@ class Robot: public IterativeRobot
 
 	SendableChooser *chooser;
 	const std::string autoNameDefault = "Default";
+<<<<<<< HEAD
 	const std::string autoNameCustom0 = "Auto0";
 	const std::string autoNameCustom1 = "Auto1";
 	const std::string autoNameCustom2 = "Auto2";
 	const std::string autoNameCustom3 = "Auto3";
 	const std::string autoNameCustom4 = "Auto4";
+=======
+	const std::string autoNameCustom = "Auto1";
+	const std::string autoNameCustom0 = "Auto1";
+	const std::string autoNameCustom1 = "Auto2";
+	const std::string autoNameCustom2 = "Auto3";
+	const std::string autoNameCustom3 = "Auto4";
+	const std::string autoNameCustom4 = "Auto5";
+>>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
 
 	std::string autoSelected;
 
