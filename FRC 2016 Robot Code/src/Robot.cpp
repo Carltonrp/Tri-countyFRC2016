@@ -177,7 +177,7 @@ public:
 		times = timer.Get();
 		if(autoSelected == autoNameCustom0)
 		{
-				//Custom Auto goes here
+			Drive(0,0);
 		}
 		if(autoSelected == autoNameCustom1)
 		{
