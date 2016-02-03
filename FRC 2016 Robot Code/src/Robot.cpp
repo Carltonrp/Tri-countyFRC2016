@@ -42,10 +42,10 @@ class Robot: public IterativeRobot
 	SendableChooser *chooser;
 	const std::string autoNameDefault = "Default";
 	const std::string autoNameCustom = "Auto1";
-	const std::string autoNameCustom = "Auto2";
-	const std::string autoNameCustom = "Auto3";
-	const std::string autoNameCustom = "Auto4";
-	const std::string autoNameCustom = "Auto5";
+//	const std::string autoNameCustom = "Auto2";
+//	const std::string autoNameCustom = "Auto3";
+//	const std::string autoNameCustom = "Auto4";
+//	const std::string autoNameCustom = "Auto5";
 
 	std::string autoSelected;
 
