@@ -321,8 +321,11 @@ public:
 		drivePower		=	0;
 		turnPower		=	0;
 		TurnPIDReset();
+<<<<<<< HEAD
 		turnPower		=	0;
 		TurnPIDReset();
+=======
+>>>>>>> refs/remotes/origin/master
 	}
 
 	/* DRIVE FUNCTIONS */
@@ -408,8 +411,14 @@ public:
 			}
 			else
 			{
+<<<<<<< HEAD
 			driveStraight = true;
 			KeepAngle( 0 , _y );
+=======
+				driveStraight = true;
+				KeepAngle( 0 , _y );
+			}
+>>>>>>> refs/remotes/origin/master
 		}
 		}
 		else
