@@ -30,6 +30,9 @@ double	drivePowerRight					=	0;
 double	turnPower						=	0;
 double	targetAngle						=	0;
 
+int		autoDriveState					=	0;
+double	distance						=	0;
+
 double times;
 
 
@@ -141,7 +144,11 @@ public:
 		std::cout << "Auto selected: " << autoSelected << std::endl;
 		if(autoSelected == autoNameCustom0)
 		{
+<<<<<<< HEAD
 			KillAll();			//Custom Auto goes here
+=======
+			KillAll();
+>>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
 		}
 		else if(autoSelected == autoNameCustom1)
 		{
@@ -164,7 +171,7 @@ public:
 			KillAll();
 		}
 		timer.Start();
-		Wait(0.5);
+		Wait(0.1);
 		gyro.Calibrate();
 	}
 
@@ -363,7 +370,7 @@ public:
 		SmoothDrive( _y - _x , _y + _x );
 	}
 
-	bool	KeepAngle	( double _targetAngle , double _drive )
+	void	KeepAngle	( double _targetAngle , double _drive )
 	{
 		// calculate angle deviation
 		double _currentAngleDeviation = AngularDifference( GetAngle() , _targetAngle );
@@ -388,10 +395,6 @@ public:
 
 		// drive the robot
 		TankDrive( turnPower , drivePower );
-
-		// return true if angle is within tolerance
-		if ( fabs( _currentAngleDeviation ) <= ANGLE_TOLERANCE ) return true;
-		else return false;
 	}
 
 	void	SpecialTankDrive	( double _x , double _y )
@@ -429,9 +432,79 @@ public:
 		}
 	}
 
+	/*
+	 * Automatically drive straight for a specified distance.
+	 */
+	bool	AutoDrive	( double _targetDistance , double _speed = 0.5 )
+	{
+		if ( autoDriveState == 0 )
+		{
+			gyro.Reset();
+			TurnPIDReset();
+			DistanceReset();
+			autoDriveState = 1;
+		}
+		if ( autoDriveState == 1 )
+		{
+			double	distanceRemaining	=	distance - TrackDistance();
+			//
+			if ( distanceRemaining < 0 )
+			{
+				// if facing correct angle,
+				if ( fabs( GetAngle() ) <= ANGLE_TOLERANCE )
+				{
+					// drive straight
+					KeepAngle( 0 , _speed );
+				}
+				else
+				{
+					// stop to correct angle
+					KeepAngle( 0 , 0 );
+				}
+			}
+			else if ( distanceRemaining > 0 )
+			{
+				// if facing correct angle,
+				if ( fabs( GetAngle() ) <= ANGLE_TOLERANCE )
+				{
+					// drive straight
+					KeepAngle( 0 , _speed );
+				}
+				else
+				{
+					// stop to correct angle
+					KeepAngle( 0 , 0 );
+				}
+			}
+			else
+			{
+				autoDriveState = 2;
+			}
+		}
+		if ( autoDriveState == 2 )
+		{
+			// if not facing the correct angle
+			if ( fabs( GetAngle() ) > ANGLE_TOLERANCE )
+			{
+				// turn to face the correct angle
+				KeepAngle( 0 , 0 );
+			}
+			else
+			{
+				autoDriveState = -1;
+			}
+		}
+		if ( autoDriveState == -1 )
+		{
+			autoDriveState = 0;
+			return true;
+		}
+		else return false;
+	}
+
 	/* GYRO FUNCTIONS */
 
-	double	ModAngle ( double angle )
+	double	ModAngle	( double angle )
 	{
 		angle = angle - 360 * floorf( ( angle - 180 ) / 360 ) - 360;
 		if ( angle == -180 ) angle = 180;
@@ -460,6 +533,17 @@ public:
 		turnI			=	0;
 		turnD			=	0;
 		turnInterval	=	0;
+	}
+
+	/* ACCELEROMETER FUNCTIONS */
+	void	DistanceReset	()
+	{
+		distance	=	0;
+	}
+
+	double	TrackDistance	()
+	{
+		return 0;
 	}
 };
 
