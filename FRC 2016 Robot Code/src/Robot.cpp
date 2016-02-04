@@ -6,6 +6,7 @@
 
 const double	SMOOTH_DRIVE_P_GAIN		=	0.5;
 const double	SMOOTH_DRIVE_DEADZONE	=	0.01;
+const double	DRIVE_X_TOLERANCE		=	0.1;
 const double	ANGLE_TOLERANCE			=	0.1;
 
 const double	DRIVE_P_GAIN			=	0.5;
@@ -18,8 +19,10 @@ const double	TURN_I_GAIN				=	0.5;
 const double	TURN_D_GAIN				=	6;
 const double	TURN_K					=	0.001;
 
-double speedLeft						=	0;
-double speedRight						=	0;
+double	speedLeft						=	0;
+double	speedRight						=	0;
+
+bool	driveStraight					=	false;
 
 double	driveP							=	0;
 double	driveI							=	0;
@@ -109,7 +112,6 @@ public:
 
 		SmartDashboard::PutData("Auto Modes", chooser);
 
-		gyro.Calibrate();						//Setting the gyroscope to zero wherever it is
 		AR->Set(Relay::Value::kOff);
 		AL->Set(Relay::Value::kOff);
 
@@ -124,6 +126,7 @@ public:
 		timer.Stop();
 		timer.Reset();
 
+		gyro.Calibrate();
 	}
 
 
@@ -170,6 +173,8 @@ public:
 
 		}
 		timer.Start();
+		Wait(0.5);
+		gyro.Calibrate();
 	}
 
 	void AutonomousPeriodic()
@@ -177,49 +182,48 @@ public:
 		times = timer.Get();
 		if(autoSelected == autoNameCustom0)
 		{
-			Drive(0,0);
+			KillAll();
 		}
 		else if(autoSelected == autoNameCustom1)
 		{
-
+			KillAll();
 		}
 		else if(autoSelected == autoNameCustom2)
 		{
-
+			KillAll();
 		}
 		else if(autoSelected == autoNameCustom3)
 		{
-
+			KillAll();
 		}
 		else if(autoSelected == autoNameCustom4)
 		{
-
+			KillAll();
 		}
 		else
 		{
 				//Default Auto goes here
-			std::cout<<"/n Time =";
-			std::cout<<timer.Get();
+//			std::cout<<"/n Time =";
+//			std::cout<<timer.Get();
+//
+//			if (times <= 5)
+//			{
+//				driveLeft.Set(0.2);
+//				driveRight.Set(-0.2);
+//			}
+//			else if ((times <= 10) && (times > 5))
+//			{
+//				driveLeft.Set(-0.2);
+//				driveRight.Set(0.2);
+//			}
+//			else
+//			{
+//				timer.Reset();
+//				timer.Start();
+//			}
+			KillAll();
+		}
 
-			if (times <= 5)
-			{
-				driveLeft.Set(0.2);
-				driveRight.Set(-0.2);
-			}
-			else if ((times <= 10) && (times > 5))
-			{
-				driveLeft.Set(-0.2);
-				driveRight.Set(0.2);
-			}
-			else
-			{
-				timer.Reset();
-				timer.Start();
-			}
-			}
-
-		std::cout<<"\ngyro angle =";
-		std::cout<<gyro.GetAngle();
 //		TankDrive(gyro.GetAngle()/90,0);
 
 		auto grip = NetworkTable::GetTable("grip");
@@ -240,6 +244,8 @@ public:
 
 		std::cout<< "\nangle = ";
 		std::cout<< gyro.GetAngle();
+		std::cout<< "\trate = ";
+		std::cout<< gyro.GetRate();
 
 	}
 
@@ -247,7 +253,7 @@ public:
 	{
 		AL->Set(Relay::Value::kOn);
 		AR->Set(Relay::Value::kOff);
-
+		gyro.Calibrate();
 	}
 
 	void TeleopPeriodic()
@@ -281,17 +287,6 @@ public:
 			targetAngle = ModAngle( -driveStick.GetPOV() );
 		}
 
-		// Straight drive
-		else if ( driveStick.GetTrigger() )
-		{
-			KeepAngle( targetAngle , driveStick.GetRawAxis(1) );
-		}
-		// Normal drive
-		else
-		{
-			SmoothTankDrive( driveStick.GetRawAxis(0), driveStick.GetRawAxis(1) );
-			TurnPIDReset();
-		}
 		if (driveThumbLU.Get())
 		{
 			arm.Set(0.2);
@@ -313,17 +308,28 @@ public:
 		lw->Run();
 	}
 
-	/* DRIVE FUNCTIONS */
+	/* MISC. CONTROL FUNCTIONS */
 
-	void	Drive ( double _left , double _right )
+	void	KillAll ()
 	{
-		// set left motors
-		driveLeft.Set	(-_left);
-		// set right motors
-		driveRight.Set	(_right);
+		driveLeft.Set	(	0	);
+		driveRight.Set	(	0	);
+		drivePowerLeft	=	0;
+		drivePowerRight	=	0;
+		drivePower		=	0;
 	}
 
-	void	SmoothDrive ( double _left , double _right )
+	/* DRIVE FUNCTIONS */
+
+	void	Drive	( double _left , double _right )
+	{
+		// set left motors
+		driveLeft.Set	( -_left );
+		// set right motors
+		driveRight.Set	( _right );
+	}
+
+	void	SmoothDrive	( double _left , double _right )
 	{
 		if( fabs( _left ) <= SMOOTH_DRIVE_DEADZONE && fabs( _right ) <= SMOOTH_DRIVE_DEADZONE )
 		{
@@ -338,14 +344,33 @@ public:
 		Drive( drivePowerLeft , drivePowerRight );
 	}
 
-	void	TankDrive ( double _x , double _y )
+	void	TankDrive	( double _x , double _y )
 	{
 		Drive( _y - _x , _y + _x );
 	}
 
-	void	SmoothTankDrive ( double _x , double _y )
+	void	SmoothTankDrive	( double _x , double _y )
 	{
 		SmoothDrive( _y - _x , _y + _x );
+	}
+
+	void	SpecialTankDrive	( double _x , double _y )
+	{
+		if ( fabs( _x ) < DRIVE_X_TOLERANCE || driveStick.GetTrigger() )
+		{
+			if ( !driveStraight )
+			{
+				gyro.Reset();
+				TurnPIDReset();
+			}
+			driveStraight = true;
+			KeepAngle( 0 , _y );
+		}
+		else
+		{
+			driveStraight = false;
+			SmoothDrive( _y - _x , _y + _x );
+		}
 	}
 
 	/* GYRO FUNCTIONS */
@@ -357,12 +382,12 @@ public:
 		return angle;
 	}
 
-	double	GetAngle ()
+	double	GetAngle	()
 	{
 		return ModAngle( gyro.GetAngle() );
 	}
 
-	double	AngularDifference ( double left , double right )
+	double	AngularDifference	( double left , double right )
 	{
 		std::cout<<"\n";
 		std::cout<<left;
@@ -373,7 +398,7 @@ public:
 		return ModAngle( left - right );
 	}
 
-	void	TurnPIDReset()
+	void	TurnPIDReset	()
 	{
 		turnP			=	0;
 		turnI			=	0;
@@ -381,7 +406,7 @@ public:
 		turnInterval	=	0;
 	}
 
-	bool	KeepAngle ( double _targetAngle , double _drive )
+	bool	KeepAngle	( double _targetAngle , double _drive )
 	{
 		// calculate angle deviation
 		double _currentAngleDeviation = AngularDifference( GetAngle() , _targetAngle );
