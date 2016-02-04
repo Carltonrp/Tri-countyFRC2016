@@ -35,6 +35,9 @@ double	distance						=	0;
 
 double times;
 
+double accelX;
+double accelY;
+double accelZ;
 
 class Robot: public IterativeRobot
 {
@@ -63,6 +66,7 @@ class Robot: public IterativeRobot
 	CANTalon driveRight;
 	CANTalon arm;
 	AnalogGyro gyro;
+	ADXL345_I2C accel;
 
 	JoystickButton JoyR;
 	JoystickButton JoyL;
@@ -88,7 +92,8 @@ public:
 		gyro(0),
 		JoyR(&driveStick,5),
 		JoyL(&driveStick,4),
-		chooser()
+		chooser(),
+		accel(0)
 	{}
 
 
@@ -219,6 +224,18 @@ public:
 //				timer.Reset();
 //				timer.Start();
 //			}
+
+			accelX = accel.GetX();
+			accelY = accel.GetY();
+			accelZ = accel.GetZ();
+
+			std::cout<<"/n AccelX =";
+			std::cout<<accelX;
+			std::cout<<"/n AccelY =";
+			std::cout<<accelY;
+			std::cout<<"/n AccelZ =";
+			std::cout<<accelZ;
+
 			KillAll();
 		}
 
