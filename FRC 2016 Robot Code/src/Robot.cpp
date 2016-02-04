@@ -5,14 +5,9 @@
 #include "Timer.h"
 
 const double	SMOOTH_DRIVE_P_GAIN		=	0.5;
-const double	SMOOTH_DRIVE_DEADZONE	=	0.01;
-const double	DRIVE_X_TOLERANCE		=	0.1;
+const double	DRIVE_DEADZONE			=	0.05;
+const double	DRIVE_X_TOLERANCE		=	0.05;
 const double	ANGLE_TOLERANCE			=	0.1;
-
-const double	DRIVE_P_GAIN			=	0.5;
-const double	DRIVE_I_GAIN			=	0.1;
-const double	DRIVE_D_GAIN			=	0.2;
-const double	DRIVE_K					=	1.0;
 
 const double	TURN_P_GAIN				=	1;
 const double	TURN_I_GAIN				=	0.5;
@@ -23,10 +18,6 @@ double	speedLeft						=	0;
 double	speedRight						=	0;
 
 bool	driveStraight					=	false;
-
-double	driveP							=	0;
-double	driveI							=	0;
-double	driveD							=	0;
 
 double	turnP							=	0;
 double	turnI							=	0;
@@ -270,19 +261,13 @@ public:
 		// Stop all movement and reset PID controls
 		if ( driveThumb.Get() )
 		{
-			Drive( 0 , 0 );
-			gyro.Reset();
-
-			drivePower		=	0;
-			drivePowerLeft	=	0;
-			drivePowerRight	=	0;
-
-			turnPower		=	0;
-			TurnPIDReset();
+			KillDrive();
+		}
+		else
+		{
+			SpecialTankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
 		}
 
-		std::cout<< "\nTarget Angle: ";
-		std::cout<< (int) targetAngle;
 		if ( driveStick.GetPOV() != -1 ) {
 			targetAngle = ModAngle( -driveStick.GetPOV() );
 		}
@@ -308,8 +293,11 @@ public:
 		lw->Run();
 	}
 
-	/* MISC. CONTROL FUNCTIONS */
+	/* Kill Functions */
 
+	/*
+	 * Unconditionally stop all motors and reset control variables.
+	 */
 	void	KillAll ()
 	{
 		driveLeft.Set	(	0	);
@@ -317,6 +305,22 @@ public:
 		drivePowerLeft	=	0;
 		drivePowerRight	=	0;
 		drivePower		=	0;
+		turnPower		=	0;
+		TurnPIDReset();
+	}
+
+	/*
+	 * Unconditionally stop all drive motors and reset drive control variables.
+	 */
+	void	KillDrive ()
+	{
+		driveLeft.Set	(	0	);
+		driveRight.Set	(	0	);
+		drivePowerLeft	=	0;
+		drivePowerRight	=	0;
+		drivePower		=	0;
+		turnPower		=	0;
+		TurnPIDReset();
 	}
 
 	/* DRIVE FUNCTIONS */
@@ -331,7 +335,7 @@ public:
 
 	void	SmoothDrive	( double _left , double _right )
 	{
-		if( fabs( _left ) <= SMOOTH_DRIVE_DEADZONE && fabs( _right ) <= SMOOTH_DRIVE_DEADZONE )
+		if( fabs( _left ) <= DRIVE_DEADZONE && fabs( _right ) <= DRIVE_DEADZONE )
 		{
 			drivePowerLeft	= 0;
 			drivePowerRight	= 0;
@@ -354,20 +358,61 @@ public:
 		SmoothDrive( _y - _x , _y + _x );
 	}
 
+	bool	KeepAngle	( double _targetAngle , double _drive )
+	{
+		// calculate angle deviation
+		double _currentAngleDeviation = AngularDifference( GetAngle() , _targetAngle );
+
+		// increment interval
+		turnInterval++;
+
+		// calculate PID
+		turnP	=	_currentAngleDeviation;
+		turnI	+=	_currentAngleDeviation;
+		turnD	=	-gyro.GetRate();
+
+		// calculate turn power
+		turnPower	=	TURN_K * ( TURN_P_GAIN * turnP + TURN_I_GAIN * turnI + TURN_D_GAIN * turnD );
+
+		// limit turnPower to [-1,+1]
+		if		( turnPower > +1 )	turnPower	=	+1;
+		else if	( turnPower < -1 )	turnPower	=	-1;
+
+		// calculate drive power
+		drivePower	+=	SMOOTH_DRIVE_P_GAIN * (	_drive	- 	drivePower	);
+
+		// drive the robot
+		TankDrive( turnPower , drivePower );
+
+		// return true if angle is within tolerance
+		if ( fabs( _currentAngleDeviation ) <= ANGLE_TOLERANCE ) return true;
+		else return false;
+	}
+
 	void	SpecialTankDrive	( double _x , double _y )
 	{
-		if ( fabs( _x ) < DRIVE_X_TOLERANCE || driveStick.GetTrigger() )
+		if ( fabs( _x ) <= DRIVE_X_TOLERANCE || driveStick.GetTrigger() )
 		{
+			std::cout<<"\nSTRAIGHT DRIVE!";
 			if ( !driveStraight )
 			{
 				gyro.Reset();
 				TurnPIDReset();
 			}
-			driveStraight = true;
-			KeepAngle( 0 , _y );
+			if ( fabs( _x ) <= DRIVE_DEADZONE && fabs( _y ) <= DRIVE_DEADZONE )
+			{
+				driveStraight = false;
+				Drive( 0 , 0 );
+			}
+			else
+			{
+				driveStraight = true;
+				KeepAngle( 0 , _y );
+			}
 		}
 		else
 		{
+			std::cout<<"\nSMOOTH DRIVE!";
 			driveStraight = false;
 			SmoothDrive( _y - _x , _y + _x );
 		}
@@ -404,37 +449,6 @@ public:
 		turnI			=	0;
 		turnD			=	0;
 		turnInterval	=	0;
-	}
-
-	bool	KeepAngle	( double _targetAngle , double _drive )
-	{
-		// calculate angle deviation
-		double _currentAngleDeviation = AngularDifference( GetAngle() , _targetAngle );
-
-		// increment interval
-		turnInterval++;
-
-		// calculate PID
-		turnP	=	_currentAngleDeviation;
-		turnI	+=	_currentAngleDeviation;
-		turnD	=	-gyro.GetRate();
-
-		// calculate turn power
-		turnPower	=	TURN_K * ( TURN_P_GAIN * turnP + TURN_I_GAIN * turnI + TURN_D_GAIN * turnD );
-
-		// limit turnPower to [-1,+1]
-		if		( turnPower > +1 )	turnPower	=	+1;
-		else if	( turnPower < -1 )	turnPower	=	-1;
-
-		// calculate drive power
-		drivePower	+=	SMOOTH_DRIVE_P_GAIN * (	_drive	- 	drivePower	);
-
-		// drive the robot
-		TankDrive( turnPower , drivePower );
-
-		// return true if angle is within tolerance
-		if ( fabs( _currentAngleDeviation ) <= ANGLE_TOLERANCE ) return true;
-		else return false;
 	}
 };
 
