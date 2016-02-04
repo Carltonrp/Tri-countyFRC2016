@@ -144,11 +144,11 @@ public:
 		std::cout << "Auto selected: " << autoSelected << std::endl;
 		if(autoSelected == autoNameCustom0)
 		{
-<<<<<<< HEAD
+
 			KillAll();			//Custom Auto goes here
-=======
+
 			KillAll();
->>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
+
 		}
 		else if(autoSelected == autoNameCustom1)
 		{
@@ -328,11 +328,10 @@ public:
 		drivePower		=	0;
 		turnPower		=	0;
 		TurnPIDReset();
-<<<<<<< HEAD
+
 		turnPower		=	0;
 		TurnPIDReset();
-=======
->>>>>>> refs/remotes/origin/master
+
 	}
 
 	/* DRIVE FUNCTIONS */
@@ -414,15 +413,13 @@ public:
 			}
 			else
 			{
-<<<<<<< HEAD
+
 			driveStraight = true;
 			KeepAngle( 0 , _y );
-=======
+
 				driveStraight = true;
 				KeepAngle( 0 , _y );
 			}
->>>>>>> refs/remotes/origin/master
-		}
 		}
 		else
 		{
