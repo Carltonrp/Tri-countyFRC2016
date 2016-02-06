@@ -322,13 +322,13 @@ public:
 		}
 		if (driveThumbLD.Get())
 		{
-			throwHigh.Set(1);
-			throwLow.Set(1);
+			throwHigh.Set((driveStick.GetRawAxis(3)+1)/2);
+			throwLow.Set((driveStick.GetRawAxis(3)+1)/2);
 		}
 		else if (driveThumbRD.Get())
 		{
-			throwHigh.Set(-1);
-			throwLow.Set(-1);
+			throwHigh.Set(-(driveStick.GetRawAxis(3)+1)/2);
+			throwLow.Set(-(driveStick.GetRawAxis(3)+1)/2);
 		}
 		else
 		{
