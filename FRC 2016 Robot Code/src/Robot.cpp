@@ -31,7 +31,9 @@ double	turnPower						=	0;
 double	targetAngle						=	0;
 
 int		autoDriveState					=	0;
+double	speed							=	0;
 double	distance						=	0;
+bool	tracking						=	false;
 
 double times;
 
@@ -68,8 +70,9 @@ class Robot: public IterativeRobot
 	AnalogGyro gyro;
 	ADXL345_I2C accel;
 
-	JoystickButton JoyR;
 	JoystickButton JoyL;
+	JoystickButton JoyR;
+
 	Relay *AR = new Relay(0);
 	Relay *AL = new Relay(1);
 	DoubleSolenoid *Piston = new DoubleSolenoid(0, 1);
@@ -90,10 +93,10 @@ public:
 		driveRight(2),
 		arm(3),
 		gyro(0),
-		JoyR(&driveStick,5),
+		accel(0),
 		JoyL(&driveStick,4),
-		chooser(),
-		accel(0)
+		JoyR(&driveStick,5),
+		chooser()
 	{}
 
 
@@ -149,11 +152,7 @@ public:
 		std::cout << "Auto selected: " << autoSelected << std::endl;
 		if(autoSelected == autoNameCustom0)
 		{
-
-			KillAll();			//Custom Auto goes here
-
 			KillAll();
-
 		}
 		else if(autoSelected == autoNameCustom1)
 		{
@@ -185,7 +184,11 @@ public:
 		times = timer.Get();
 		if(autoSelected == autoNameCustom0)
 		{
-			KillAll();
+			std::cout<<"\nSpeed:\t";
+			std::cout<<speed;
+			std::cout<<"\tDistance:\t";
+			std::cout<<distance;
+			AutoDrive( 10 , 0.5 );
 		}
 		else if(autoSelected == autoNameCustom1)
 		{
@@ -262,6 +265,7 @@ public:
 		std::cout<< "\trate = ";
 		std::cout<< gyro.GetRate();
 
+		TrackAccel();	// must be called at the end of the periodic loop
 	}
 
 	void TeleopInit()
@@ -309,6 +313,7 @@ public:
 			arm.Set(0);
 		}
 
+		TrackAccel();	// must be called at the end of the periodic loop
 
 	}
 
@@ -460,7 +465,8 @@ public:
 		}
 		if ( autoDriveState == 1 )
 		{
-			double	distanceRemaining	=	distance - TrackDistance();
+			TrackAccel();
+			double	distanceRemaining	=	_targetDistance - distance;
 			//
 			if ( distanceRemaining < 0 )
 			{
@@ -557,7 +563,20 @@ public:
 
 	double	TrackDistance	()
 	{
-		return 0;
+		distance	+=	timer.Get() * accel.GetY();
+		timer.Reset();
+		return distance;
+	}
+
+	void	TrackAccel	()
+	{
+		if ( tracking )
+		{
+			speed		+=	timer.Get() * accel.GetY();
+			distance	+=	timer.Get() * speed;
+			timer.Reset();
+		}
+		tracking = true;
 	}
 };
 
