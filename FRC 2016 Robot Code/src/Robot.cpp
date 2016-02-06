@@ -78,6 +78,8 @@ class Robot: public IterativeRobot
 	CANTalon driveLeft;
 	CANTalon driveRight;
 	CANTalon arm;
+	CANTalon throwLow;
+	CANTalon throwHigh;
 	AnalogGyro gyro;
 	ADXL345_I2C accel;
 
@@ -102,7 +104,9 @@ public:
 		driveThumbRD( &driveStick , 4 ),
 		driveLeft(1),
 		driveRight(2),
-		arm(3),
+		arm(4),
+		throwHigh(3),
+		throwLow(5),
 		gyro(0),
 		JoyL(&driveStick,4),
 		JoyR(&driveStick,5),
@@ -243,12 +247,16 @@ public:
 			accelY = accel.GetY();
 			accelZ = accel.GetZ();
 
-			std::cout<<"/n AccelX =";
-			std::cout<<accelX;
-			std::cout<<"/n AccelY =";
+//			std::cout<<"/n AccelX =";
+//			std::cout<<accelX;
+			std::cout<<"\n AccelY = ";
 			std::cout<<accelY;
-			std::cout<<"/n AccelZ =";
-			std::cout<<accelZ;
+//			std::cout<<"/n AccelZ =";
+//			std::cout<<accelZ;
+			std::cout<<"\n speed = ";
+			std::cout<<speed;
+			std::cout<<"\n dist = ";
+			std::cout<<distance;
 
 			KillAll();
 		}
@@ -270,11 +278,11 @@ public:
 //		Piston->Set(DoubleSolenoid::Value::kReverse);
 //		Wait(3);
 //		std::cout << "Piston ";
-
-		std::cout<< "\nangle = ";
-		std::cout<< gyro.GetAngle();
-		std::cout<< "\trate = ";
-		std::cout<< gyro.GetRate();
+//
+//		std::cout<< "\nangle = ";
+//		std::cout<< gyro.GetAngle();
+//		std::cout<< "\trate = ";
+//		std::cout<< gyro.GetRate();
 
 		TrackAccel();	// must be called at the end of the periodic loop
 	}
@@ -311,7 +319,7 @@ public:
 		}
 		else
 		{
-			SpecialTankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
+			TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
 		}
 
 		if ( driveStick.GetPOV() != -1 ) {
@@ -320,15 +328,30 @@ public:
 
 		if (driveThumbLU.Get())
 		{
-			arm.Set(0.2);
+			arm.Set(0.5);
 		}
-		else if (driveThumbLU.Get())
+		else if (driveThumbRU.Get())
 		{
-			arm.Set(-0.2);
+			arm.Set(-0.5);
 		}
 		else
 		{
 			arm.Set(0);
+		}
+		if (driveThumbLD.Get())
+		{
+			throwHigh.Set(1);
+			throwLow.Set(1);
+		}
+		else if (driveThumbRD.Get())
+		{
+			throwHigh.Set(-1);
+			throwLow.Set(-1);
+		}
+		else
+		{
+			throwHigh.Set(0);
+			throwLow.Set(0);
 		}
 
 		TrackAccel();	// must be called at the end of the periodic loop
