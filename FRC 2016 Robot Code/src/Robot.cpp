@@ -14,6 +14,11 @@ const double	TURN_I_GAIN				=	0.5;
 const double	TURN_D_GAIN				=	6;
 const double	TURN_K					=	0.001;
 
+const double	PITCH_P_GAIN			=	1;
+const double	PITCH_I_GAIN			=	0.5;
+const double	PITCH_D_GAIN			=	6;
+const double	PITCH_K					=	0.001;
+
 double	speedLeft						=	0;
 double	speedRight						=	0;
 
@@ -22,7 +27,13 @@ bool	driveStraight					=	false;
 double	turnP							=	0;
 double	turnI							=	0;
 double	turnD							=	0;
-int		turnInterval					=	0;
+double	turnInterval					=	0;
+
+double	pitch							=	0;
+double	pitchSpeed						=	0;
+double	pitchP							=	0;
+double	pitchI							=	0;
+double	pitchD							=	0;
 
 double	drivePower						=	0;
 double	drivePowerLeft					=	0;
@@ -285,8 +296,15 @@ public:
 
 	void TeleopPeriodic()
 	{
-		std::cout<< "\nangle = ";
-		std::cout<< gyro.GetAngle();
+		std::cout<< "\ndist = ";
+		std::cout<< distance;
+		std::cout<< "\tspeed = ";
+		std::cout<< speed;
+		std::cout<< "\taccel = ";
+		std::cout<< accel.GetY();
+
+//		std::cout<< "\nangle = ";
+//		std::cout<< gyro.GetAngle();
 //		std::cout<< "\tP = ";
 //		std::cout<< (int) turnP;
 //		std::cout<< "\tI = ";
@@ -294,7 +312,7 @@ public:
 //		std::cout<< "\tD = ";
 //		std::cout<< (int) turnD;
 
-		// Stop all movement and reset PID controls
+		// Stop all movement and reset PID controls3
 		if ( driveThumb.Get() )
 		{
 			KillDrive();
@@ -593,6 +611,23 @@ public:
 			timer.Reset();
 		}
 		tracking = true;
+	}
+	/* THROWER CONTROL FUNCTIONS */
+	void	setPitch	( double _target )
+	{
+		if ( _target >= 0 && _target <= 80 )
+		{
+			double _deviation = pitch - _target;
+			pitchP	=	_deviation;
+			pitchI	+=	_deviation;
+			pitchD	=	pitchSpeed;
+			arm.Set( PITCH_K * ( PITCH_P_GAIN * pitchP + PITCH_I_GAIN * pitchI + PITCH_D_GAIN * pitchD ) );
+		}
+		else
+		{
+			arm.Set( 0 );
+			std::cout<<"error in 'setPitch': target out of range";
+		}
 	}
 };
 
