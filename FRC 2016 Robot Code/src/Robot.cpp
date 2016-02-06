@@ -93,7 +93,7 @@ public:
 		JoyR(&driveStick,5),
 		JoyL(&driveStick,4),
 		chooser(),
-		accel(0)
+		accel(I2C::Port::kOnboard)
 	{}
 
 
