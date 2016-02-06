@@ -19,6 +19,8 @@ const double	PITCH_I_GAIN			=	0.5;
 const double	PITCH_D_GAIN			=	6;
 const double	PITCH_K					=	0.001;
 
+double	ACCEL_CALIBRATION				=	0;
+
 double	speedLeft						=	0;
 double	speedRight						=	0;
 
@@ -143,6 +145,11 @@ public:
 		timer.Stop();
 		timer.Reset();
 
+		Wait(0.01);
+
+		for ( int n = 0 ; n < 64 ; n++ )	ACCEL_CALIBRATION	+=	accel.GetY();
+		ACCEL_CALIBRATION	/=	64;
+
 		gyro.Calibrate();
 	}
 
@@ -189,9 +196,6 @@ public:
 		{
 			KillAll();
 		}
-		timer.Start();
-		Wait(0.1);
-		gyro.Calibrate();
 	}
 
 	void AutonomousPeriodic()
@@ -199,7 +203,9 @@ public:
 		times = timer.Get();
 		if(autoSelected == autoNameCustom0)
 		{
-			std::cout<<"\nSpeed:\t";
+			std::cout<<"\nCALIBRATION:\t";
+			std::cout<<ACCEL_CALIBRATION;
+			std::cout<<"\tSpeed:\t";
 			std::cout<<speed;
 			std::cout<<"\tDistance:\t";
 			std::cout<<distance;
