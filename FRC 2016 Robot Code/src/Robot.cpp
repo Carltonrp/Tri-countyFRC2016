@@ -72,11 +72,12 @@ class Robot: public IterativeRobot
 	Timer timer;
 	RobotDrive Robotc;
 	Joystick driveStick;
+	Joystick oppStick;
 	JoystickButton driveThumb;
-	JoystickButton driveThumbLU;
-	JoystickButton driveThumbRU;
-	JoystickButton driveThumbLD;
-	JoystickButton driveThumbRD;
+	JoystickButton oppThumbLU;
+	JoystickButton oppThumbRU;
+	JoystickButton oppThumbLD;
+	JoystickButton oppThumbRD;
 	CANTalon driveLeft;
 	CANTalon driveRight;
 	CANTalon arm;
@@ -99,11 +100,12 @@ public:
 	Robot():
 		Robotc(1, 2),
 		driveStick(0),
+		oppStick(1),
 		driveThumb( &driveStick , 2 ),
-		driveThumbLU( &driveStick , 5 ),
-		driveThumbRU( &driveStick , 6 ),
-		driveThumbLD( &driveStick , 3 ),
-		driveThumbRD( &driveStick , 4 ),
+		oppThumbLU( &oppStick , 5 ),
+		oppThumbRU( &oppStick , 6 ),
+		oppThumbLD( &oppStick , 3 ),
+		oppThumbRD( &oppStick , 4 ),
 		driveLeft(1),
 		driveRight(2),
 		arm(4),
@@ -332,11 +334,11 @@ public:
 			targetAngle = ModAngle( -driveStick.GetPOV() );
 		}
 
-		if (driveThumbLU.Get())
+		if (oppThumbLU.Get())
 		{
 			arm.Set(0.5);
 		}
-		else if (driveThumbRU.Get())
+		else if (oppThumbRU.Get())
 		{
 			arm.Set(-0.5);
 		}
@@ -344,15 +346,15 @@ public:
 		{
 			arm.Set(0);
 		}
-		if (driveThumbLD.Get())
+		if (oppThumbLD.Get())
 		{
-			throwHigh.Set(1);
-			throwLow.Set(1);
+			throwHigh.Set((oppStick.GetRawAxis(3)+1)/2);
+			throwLow.Set((oppStick.GetRawAxis(3)+1)/2);
 		}
-		else if (driveThumbRD.Get())
+		else if (oppThumbRD.Get())
 		{
-			throwHigh.Set(-1);
-			throwLow.Set(-1);
+			throwHigh.Set(-(oppStick.GetRawAxis(3)+1)/2);
+			throwLow.Set(-(oppStick.GetRawAxis(3)+1)/2);
 		}
 		else
 		{
