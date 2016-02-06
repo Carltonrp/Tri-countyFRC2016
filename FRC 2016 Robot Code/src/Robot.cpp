@@ -93,7 +93,6 @@ public:
 		driveRight(2),
 		arm(3),
 		gyro(0),
-		accel(0),
 		JoyL(&driveStick,4),
 		JoyR(&driveStick,5),
 		chooser(),
