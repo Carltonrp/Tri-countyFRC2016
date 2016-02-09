@@ -56,7 +56,8 @@ class Robot: public IterativeRobot
 {
 	LiveWindow *lw = LiveWindow::GetInstance();
 
-	SendableChooser *chooser;
+	SendableChooser *autoChooser;
+	SendableChooser *teleChooser;
 	const std::string autoNameDefault = "Default";
 
 	const std::string autoNameCustom0 = "Auto0";
@@ -67,6 +68,12 @@ class Robot: public IterativeRobot
 
 	std::string autoSelected;
 
+	const std::string teleNameDefault = "BothSticks";
+
+	const std::string teleNameCustom0 = "SingleStick";
+
+	std::string teleSelected;
+
 	Timer timer;
 	RobotDrive Robotc;
 	Joystick driveStick;
@@ -76,6 +83,10 @@ class Robot: public IterativeRobot
 	JoystickButton oppThumbRU;
 	JoystickButton oppThumbLD;
 	JoystickButton oppThumbRD;
+	JoystickButton driveThumbLU;
+	JoystickButton driveThumbRU;
+	JoystickButton driveThumbLD;
+	JoystickButton driveThumbRD;
 	CANTalon driveLeft;
 	CANTalon driveRight;
 	CANTalon arm;
@@ -104,6 +115,10 @@ public:
 		oppThumbRU( &oppStick , 6 ),
 		oppThumbLD( &oppStick , 3 ),
 		oppThumbRD( &oppStick , 4 ),
+		driveThumbLU( &driveStick , 5 ),
+		driveThumbRU( &driveStick , 6 ),
+		driveThumbLD( &driveStick , 3 ),
+		driveThumbRD( &driveStick , 4 ),
 		driveLeft(1),
 		driveRight(2),
 		arm(4),
@@ -112,7 +127,8 @@ public:
 		gyro(0),
 		JoyL(&driveStick,4),
 		JoyR(&driveStick,5),
-		chooser(),
+		autoChooser(),
+		teleChooser(),
 		accel(I2C::Port::kOnboard)
 	{}
 
@@ -121,15 +137,21 @@ public:
 
 	void RobotInit()
 	{
-		chooser = new SendableChooser();
-		chooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
-		chooser->AddObject(autoNameCustom0, (void*)&autoNameCustom0);
-		chooser->AddObject(autoNameCustom1, (void*)&autoNameCustom1);
-		chooser->AddObject(autoNameCustom2, (void*)&autoNameCustom2);
-		chooser->AddObject(autoNameCustom3, (void*)&autoNameCustom3);
-		chooser->AddObject(autoNameCustom4, (void*)&autoNameCustom4);
+		autoChooser = new SendableChooser();
+		autoChooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
+		autoChooser->AddObject(autoNameCustom0, (void*)&autoNameCustom0);
+		autoChooser->AddObject(autoNameCustom1, (void*)&autoNameCustom1);
+		autoChooser->AddObject(autoNameCustom2, (void*)&autoNameCustom2);
+		autoChooser->AddObject(autoNameCustom3, (void*)&autoNameCustom3);
+		autoChooser->AddObject(autoNameCustom4, (void*)&autoNameCustom4);
 
-		SmartDashboard::PutData("Auto Modes", chooser);
+		SmartDashboard::PutData("Auto Modes", autoChooser);
+
+		teleChooser = new SendableChooser();
+		teleChooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
+		teleChooser->AddObject(autoNameCustom0, (void*)&autoNameCustom0);
+
+		SmartDashboard::PutData("Auto Modes", teleChooser);
 
 		AR->Set(Relay::Value::kOff);
 		AL->Set(Relay::Value::kOff);
@@ -164,7 +186,7 @@ public:
 		AR->Set(Relay::Value::kOn);
 		AL->Set(Relay::Value::kOff);
 
-		autoSelected = *((std::string*)chooser->GetSelected());
+		autoSelected = *((std::string*)autoChooser->GetSelected());
 		std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
 		std::cout << "Auto selected: " << autoSelected << std::endl;
 		if(autoSelected == autoNameCustom0)
@@ -205,7 +227,7 @@ public:
 			std::cout<<speed;
 			std::cout<<"\tDistance:\t";
 			std::cout<<distance;
-			AutoDrive( 10 , 0.5 );
+			AutoDrive( 200 , -.2 );
 		}
 		else if(autoSelected == autoNameCustom1)
 		{
@@ -294,6 +316,10 @@ public:
 		AL->Set(Relay::Value::kOn);
 		AR->Set(Relay::Value::kOff);
 		gyro.Calibrate();
+
+		teleSelected = *((std::string*)teleChooser->GetSelected());
+		std::string TeleSelected = SmartDashboard::GetString("Tele Selector", teleNameDefault);
+		std::cout << "Tele selected: " << teleSelected << std::endl;
 	}
 
 	void TeleopPeriodic()
@@ -315,49 +341,54 @@ public:
 //		std::cout<< (int) turnD;
 
 		// Stop all movement and reset PID controls3
-		if ( driveThumb.Get() )
-		{
-			KillDrive();
-		}
-		else
-		{
-			TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
-		}
 
-		if ( driveStick.GetPOV() != -1 ) {
-			targetAngle = ModAngle( -driveStick.GetPOV() );
-		}
+		if (teleSelected == teleNameCustom0)
+		{
+			if ( driveThumb.Get() )
+					{
+						KillDrive();
+					}
+					else
+					{
+						TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
+					}
 
-		if (oppThumbLU.Get())
-		{
-			arm.Set(0.5);
-		}
-		else if (oppThumbRU.Get())
-		{
-			arm.Set(-0.5);
-		}
-		else
-		{
-			arm.Set(0);
-		}
-		if (oppThumbLD.Get())
-		{
-			throwHigh.Set((oppStick.GetRawAxis(3)+1)/2);
-			throwLow.Set((oppStick.GetRawAxis(3)+1)/2);
-		}
-		else if (oppThumbRD.Get())
-		{
-			throwHigh.Set(-(oppStick.GetRawAxis(3)+1)/2);
-			throwLow.Set(-(oppStick.GetRawAxis(3)+1)/2);
-		}
-		else
-		{
-			throwHigh.Set(0);
-			throwLow.Set(0);
-		}
+					if ( driveStick.GetPOV() != -1 ) {
+						targetAngle = ModAngle( -driveStick.GetPOV() );
+					}
 
-		TrackAccel();	// must be called at the end of the periodic loop
+					if (oppThumbLU.Get())
+					{
+						arm.Set(0.5);
+					}
+					else if (oppThumbRU.Get())
+					{
+						arm.Set(-0.5);
+					}
+					else
+					{
+						arm.Set(0);
+					}
+					if (oppThumbLD.Get())
+					{
+						throwHigh.Set((oppStick.GetRawAxis(3)+1)/2);
+						throwLow.Set((oppStick.GetRawAxis(3)+1)/2);
+					}
+					else if (oppThumbRD.Get())
+					{
+						throwHigh.Set(-(oppStick.GetRawAxis(3)+1)/2);
+						throwLow.Set(-(oppStick.GetRawAxis(3)+1)/2);
+					}
+					else
+					{
+						throwHigh.Set(0);
+						throwLow.Set(0);
+					}
 
+					TrackAccel();	// must be called at the end of the periodic loop
+
+
+		}
 	}
 
 	void TestPeriodic()
