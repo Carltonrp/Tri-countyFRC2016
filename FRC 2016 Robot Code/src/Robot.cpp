@@ -19,6 +19,8 @@ const double	PITCH_I_GAIN			=	0.5;
 const double	PITCH_D_GAIN			=	6;
 const double	PITCH_K					=	0.001;
 
+double	ACCEL_CALIBRATION				=	0;
+
 double	speedLeft						=	0;
 double	speedRight						=	0;
 
@@ -42,6 +44,7 @@ double	turnPower						=	0;
 double	targetAngle						=	0;
 
 int		autoDriveState					=	0;
+double	acceleration					=	0;
 double	speed							=	0;
 double	distance						=	0;
 bool	tracking						=	false;
@@ -164,8 +167,14 @@ public:
 		    }
 		}
 
-		timer.Stop();
-		timer.Reset();
+		timer.Start();
+
+		for ( int n = 0 ; n < 256 ; n++ )
+		{
+			Wait(0.1);
+			ACCEL_CALIBRATION	+=	accel.GetY();
+		}
+		ACCEL_CALIBRATION	/=	256;
 
 		gyro.Calibrate();
 	}
@@ -213,9 +222,6 @@ public:
 		{
 			KillAll();
 		}
-		timer.Start();
-		Wait(0.1);
-		gyro.Calibrate();
 	}
 
 	void AutonomousPeriodic()
@@ -223,10 +229,6 @@ public:
 		times = timer.Get();
 		if(autoSelected == autoNameCustom0)
 		{
-			std::cout<<"\nSpeed:\t";
-			std::cout<<speed;
-			std::cout<<"\tDistance:\t";
-			std::cout<<distance;
 			AutoDrive( 200 , -.2 );
 		}
 		else if(autoSelected == autoNameCustom1)
@@ -267,22 +269,17 @@ public:
 //				timer.Start();
 //			}
 
-			accelX = accel.GetX();
-			accelY = accel.GetY();
-			accelZ = accel.GetZ();
 
-//			std::cout<<"/n AccelX =";
-//			std::cout<<accelX;
-			std::cout<<"\n AccelY = ";
-			std::cout<<accelY;
-//			std::cout<<"/n AccelZ =";
-//			std::cout<<accelZ;
-			std::cout<<"\n speed = ";
+			std::cout<<"\n cal = ";
+			std::cout<<ACCEL_CALIBRATION;
+			std::cout<<"\t accel = ";
+			std::cout<<accel.GetY();
+			std::cout<<"\t speed = ";
 			std::cout<<speed;
-			std::cout<<"\n dist = ";
+			std::cout<<"\t dist = ";
 			std::cout<<distance;
 
-			KillAll();
+			TrackAccel();
 		}
 
 //		TankDrive(gyro.GetAngle()/90,0);
@@ -639,8 +636,10 @@ public:
 	{
 		if ( tracking )
 		{
-			speed		+=	timer.Get() * accel.GetY();
-			distance	+=	timer.Get() * speed;
+			double _time = timer.Get();
+			acceleration	=	accel.GetY() - ACCEL_CALIBRATION;
+			speed			+=	_time * acceleration;
+			distance		+=	_time * speed;
 			timer.Reset();
 		}
 		tracking = true;
