@@ -100,6 +100,7 @@ class Robot: public IterativeRobot
 	CANTalon throwHigh;
 	AnalogGyro gyro;
 	ADXL345_I2C accel;
+	CameraServer Cam;
 
 	JoystickButton JoyL;
 	JoystickButton JoyR;
@@ -138,7 +139,8 @@ public:
 		JoyR(&driveStick,5),
 		autoChooser(),
 		teleChooser(),
-		accel(I2C::Port::kOnboard)
+		accel(I2C::Port::kOnboard),
+		Cam()
 	{}
 
 
@@ -183,6 +185,11 @@ public:
 		ACCEL_CALIBRATION	/=	256;
 
 		gyro.Calibrate();
+
+		CameraServer::GetInstance()->SetQuality(50);
+		CameraServer::GetInstance()->StartAutomaticCapture("cam0");
+
+
 	}
 
 
@@ -349,7 +356,7 @@ public:
 		{
 			if ( driveThumb.Get() )
 			{
-					KillDrive();
+				KillDrive();
 			}
 			else
 			{
