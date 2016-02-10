@@ -57,17 +57,17 @@ double accelZ;
 
 class Robot: public IterativeRobot
 {
-	LiveWindow *lw = LiveWindow::GetInstance();
+	LiveWindow	*lw = LiveWindow::GetInstance();
 
-	SendableChooser *autoChooser;
-	SendableChooser *teleChooser;
-	const std::string autoNameDefault = "Default";
+	SendableChooser	*autoChooser;
+	SendableChooser	*teleChooser;
+	const std::string	autoNameDefault = "Default";
 
-	const std::string autoNameCustom0 = "Auto0";
-	const std::string autoNameCustom1 = "Auto1";
-	const std::string autoNameCustom2 = "Auto2";
-	const std::string autoNameCustom3 = "Auto3";
-	const std::string autoNameCustom4 = "Auto4";
+	const std::string	autoNameCustom0 = "Auto0";
+	const std::string	autoNameCustom1 = "Auto1";
+	const std::string	autoNameCustom2 = "Auto2";
+	const std::string	autoNameCustom3 = "Auto3";
+	const std::string	autoNameCustom4 = "Auto4";
 
 	std::string autoSelected;
 
@@ -87,6 +87,7 @@ class Robot: public IterativeRobot
 	JoystickButton driverStickB4;
 
 	Joystick operatorStick;
+	JoystickButton	operatorThumb;
 	JoystickButton operatorB5;
 	JoystickButton operatorB6;
 	JoystickButton operatorB3;
@@ -121,6 +122,7 @@ public:
 		driverStickB4( &driveStick , 4 ),
 
 		operatorStick(1),
+		operatorThumb( &operatorStick , 2 ),
 		operatorB5( &operatorStick , 5 ),
 		operatorB6( &operatorStick , 6 ),
 		operatorB3( &operatorStick , 3 ),
