@@ -105,6 +105,7 @@ class Robot: public IterativeRobot
 	JoystickButton	operatorB11;
 	JoystickButton	operatorB12;
 
+<<<<<<< HEAD
 	CANTalon		driveLeft;
 	CANTalon		driveRight;
 	CANTalon		arm;
@@ -113,6 +114,15 @@ class Robot: public IterativeRobot
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
 	CameraServer	Cam;
+=======
+	CANTalon driveLeft;
+	CANTalon driveRight;
+	CANTalon arm;
+	CANTalon throwLow;
+	CANTalon throwHigh;
+	AnalogGyro gyro;
+	ADXL345_I2C accel;
+>>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
 
 	Relay	*AR = new Relay(0);
 	Relay	*AL = new Relay(1);
@@ -150,6 +160,7 @@ public:
 		operatorB11		( &operatorStick , 11 ),
 		operatorB12		( &operatorStick , 12 ),
 
+<<<<<<< HEAD
 		driveLeft		( 1 ),
 		driveRight		( 2 ),
 		arm				( 4 ),
@@ -160,6 +171,20 @@ public:
 		teleChooser		( ),
 		accel			( I2C::Port::kOnboard ),
 		Cam				( )
+=======
+		driveLeft(1),
+		driveRight(2),
+		arm(4),
+		throwHigh(3),
+		throwLow(5),
+		gyro(0),
+		JoyL(&driveStick,4),
+		JoyR(&driveStick,5),
+		autoChooser(),
+		teleChooser(),
+		accel(I2C::Port::kOnboard)
+
+>>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
 	{}
 
 	void RobotInit()
