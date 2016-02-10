@@ -348,7 +348,6 @@ public:
 		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
 			if ( driveThumb.Get() )
-
 			{
 					KillDrive();
 			}
@@ -509,7 +508,21 @@ public:
 
 	void	SmoothTankDrive	( double _x , double _y )
 	{
-		SmoothDrive( _y - _x , _y + _x );
+		if( fabs( _x ) <= DRIVE_DEADZONE )
+		{
+			drivePower		=	SMOOTH_DRIVE_P_GAIN * (	_y	- 	drivePower	);
+			drivePowerLeft	=	drivePower;
+			drivePowerRight	=	drivePower;
+		}
+		else
+		{
+			double	_left	=	_y - _x;
+			double	_right	=	_y + _x;
+			drivePowerLeft	+=	SMOOTH_DRIVE_P_GAIN * (	_left	- 	drivePowerLeft	);
+			drivePowerRight	+=	SMOOTH_DRIVE_P_GAIN * (	_right	- 	drivePowerRight	);
+			drivePower		=	fmin( drivePowerLeft , drivePowerRight );
+		}
+		Drive( drivePowerLeft , drivePowerRight );
 	}
 
 	void	KeepAngle	( double _targetAngle , double _drive )
