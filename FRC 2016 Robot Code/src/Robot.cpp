@@ -81,10 +81,10 @@ class Robot: public IterativeRobot
 //	RobotDrive Robotc;
 	Joystick driveStick;
 	JoystickButton driveThumb;
-	JoystickButton driverStickB5;
-	JoystickButton driverStickB6;
-	JoystickButton driverStickB3;
-	JoystickButton driverStickB4;
+	JoystickButton driverB5;
+	JoystickButton driverB6;
+	JoystickButton driverB3;
+	JoystickButton driverB4;
 
 	Joystick operatorStick;
 	JoystickButton	operatorThumb;
@@ -116,10 +116,10 @@ public:
 //		Robotc(1, 2),
 		driveStick(0),
 		driveThumb( &driveStick , 2 ),
-		driverStickB5( &driveStick , 5 ),
-		driverStickB6( &driveStick , 6 ),
-		driverStickB3( &driveStick , 3 ),
-		driverStickB4( &driveStick , 4 ),
+		driverB5( &driveStick , 5 ),
+		driverB6( &driveStick , 6 ),
+		driverB3( &driveStick , 3 ),
+		driverB4( &driveStick , 4 ),
 
 		operatorStick(1),
 		operatorThumb( &operatorStick , 2 ),
@@ -345,7 +345,7 @@ public:
 
 		// Stop all movement and reset PID controls3
 
-		if (teleSelected == teleNameCustom0)
+		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
 			if ( driveThumb.Get() )
 
@@ -361,11 +361,11 @@ public:
 				targetAngle = ModAngle( -driveStick.GetPOV() );
 			}
 
-			if (operatorB5.Get())
+			if (driverB5.Get())
 			{
 				arm.Set(0.5);
 			}
-			else if (operatorB6.Get())
+			else if (driverB6.Get())
 			{
 				arm.Set(-0.5);
 			}
@@ -373,15 +373,15 @@ public:
 			{
 				arm.Set(0);
 			}
-			if (operatorB3.Get())
+			if (driverB3.Get())
 			{
-				throwHigh.Set((operatorStick.GetRawAxis(3)+1)/2);
-				throwLow.Set((operatorStick.GetRawAxis(3)+1)/2);
+				throwHigh.Set((driveStick.GetRawAxis(3)+1)/2);
+				throwLow.Set((driveStick.GetRawAxis(3)+1)/2);
 			}
 			else if (operatorB4.Get())
 			{
-				throwHigh.Set(-(operatorStick.GetRawAxis(3)+1)/2);
-				throwLow.Set(-(operatorStick.GetRawAxis(3)+1)/2);
+				throwHigh.Set(-(driveStick.GetRawAxis(3)+1)/2);
+				throwLow.Set(-(driveStick.GetRawAxis(3)+1)/2);
 			}
 			else
 			{
@@ -391,7 +391,7 @@ public:
 
 			TrackAccel();	// must be called at the end of the periodic loop
 		}
-		else
+		else			//Default Tele Code "Both Sticks"
 		{
 			if ( driveThumb.Get() )
 
