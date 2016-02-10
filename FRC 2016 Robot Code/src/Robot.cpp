@@ -351,7 +351,8 @@ public:
 				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
 			}
 
-			if ( driveStick.GetPOV() != -1 ) {
+					if ( driveStick.GetPOV() != -1 )
+					{
 				targetAngle = ModAngle( -driveStick.GetPOV() );
 			}
 
