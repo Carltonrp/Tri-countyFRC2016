@@ -57,48 +57,49 @@ double accelZ;
 
 class Robot: public IterativeRobot
 {
-	LiveWindow *lw = LiveWindow::GetInstance();
+	LiveWindow	*lw = LiveWindow::GetInstance();
 
-	SendableChooser *autoChooser;
-	SendableChooser *teleChooser;
-	const std::string autoNameDefault = "Default";
+	SendableChooser	*autoChooser;
+	SendableChooser	*teleChooser;
+	const std::string	autoNameDefault = "Default";
 
-	const std::string autoNameCustom0 = "Auto0";
-	const std::string autoNameCustom1 = "Auto1";
-	const std::string autoNameCustom2 = "Auto2";
-	const std::string autoNameCustom3 = "Auto3";
-	const std::string autoNameCustom4 = "Auto4";
+	const std::string	autoNameCustom0 = "Auto0";
+	const std::string	autoNameCustom1 = "Auto1";
+	const std::string	autoNameCustom2 = "Auto2";
+	const std::string	autoNameCustom3 = "Auto3";
+	const std::string	autoNameCustom4 = "Auto4";
 
-	std::string autoSelected;
+	std::string	autoSelected;
 
-	const std::string teleNameDefault = "BothSticks";
+	const std::string	teleNameDefault = "BothSticks";
 
-	const std::string teleNameCustom0 = "SingleStick";
+	const std::string	teleNameCustom0 = "SingleStick";
 
-	std::string teleSelected;
+	std::string	teleSelected;
 
 	Timer timer;
 //	RobotDrive Robotc;
-	Joystick driveStick;
-	JoystickButton driveThumb;
-	JoystickButton driverStickB5;
-	JoystickButton driverStickB6;
-	JoystickButton driverStickB3;
-	JoystickButton driverStickB4;
+	Joystick	driveStick;
+	JoystickButton	driveThumb;
+	JoystickButton	driverStickB5;
+	JoystickButton	driverStickB6;
+	JoystickButton	driverStickB3;
+	JoystickButton	driverStickB4;
 
-	Joystick operatorStick;
-	JoystickButton operatorB5;
-	JoystickButton operatorB6;
-	JoystickButton operatorB3;
-	JoystickButton operatorB4;
+	Joystick	operatorStick;
+	JoystickButton	operatorThumb;
+	JoystickButton	operatorB5;
+	JoystickButton	operatorB6;
+	JoystickButton	operatorB3;
+	JoystickButton	operatorB4;
 
-	CANTalon driveLeft;
-	CANTalon driveRight;
-	CANTalon arm;
-	CANTalon throwLow;
-	CANTalon throwHigh;
-	AnalogGyro gyro;
-	ADXL345_I2C accel;
+	CANTalon	driveLeft;
+	CANTalon	driveRight;
+	CANTalon	arm;
+	CANTalon	throwLow;
+	CANTalon	throwHigh;
+	AnalogGyro	gyro;
+	ADXL345_I2C	accel;
 
 	JoystickButton JoyL;
 	JoystickButton JoyR;
@@ -121,6 +122,7 @@ public:
 		driverStickB4( &driveStick , 4 ),
 
 		operatorStick(1),
+		operatorThumb( &operatorStick , 2 ),
 		operatorB5( &operatorStick , 5 ),
 		operatorB6( &operatorStick , 6 ),
 		operatorB3( &operatorStick , 3 ),
