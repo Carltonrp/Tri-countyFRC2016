@@ -69,37 +69,37 @@ class Robot: public IterativeRobot
 	const std::string	autoNameCustom3 = "Auto3";
 	const std::string	autoNameCustom4 = "Auto4";
 
-	std::string	autoSelected;
+	std::string autoSelected;
 
-	const std::string	teleNameDefault = "BothSticks";
+	const std::string teleNameDefault = "BothSticks";
 
-	const std::string	teleNameCustom0 = "SingleStick";
+	const std::string teleNameCustom0 = "SingleStick";
 
-	std::string	teleSelected;
+	std::string teleSelected;
 
 	Timer timer;
 //	RobotDrive Robotc;
-	Joystick	driveStick;
-	JoystickButton	driveThumb;
-	JoystickButton	driverStickB5;
-	JoystickButton	driverStickB6;
-	JoystickButton	driverStickB3;
-	JoystickButton	driverStickB4;
+	Joystick driveStick;
+	JoystickButton driveThumb;
+	JoystickButton driverB5;
+	JoystickButton driverB6;
+	JoystickButton driverB3;
+	JoystickButton driverB4;
 
-	Joystick	operatorStick;
+	Joystick operatorStick;
 	JoystickButton	operatorThumb;
-	JoystickButton	operatorB5;
-	JoystickButton	operatorB6;
-	JoystickButton	operatorB3;
-	JoystickButton	operatorB4;
+	JoystickButton operatorB5;
+	JoystickButton operatorB6;
+	JoystickButton operatorB3;
+	JoystickButton operatorB4;
 
-	CANTalon	driveLeft;
-	CANTalon	driveRight;
-	CANTalon	arm;
-	CANTalon	throwLow;
-	CANTalon	throwHigh;
-	AnalogGyro	gyro;
-	ADXL345_I2C	accel;
+	CANTalon driveLeft;
+	CANTalon driveRight;
+	CANTalon arm;
+	CANTalon throwLow;
+	CANTalon throwHigh;
+	AnalogGyro gyro;
+	ADXL345_I2C accel;
 
 	JoystickButton JoyL;
 	JoystickButton JoyR;
@@ -116,10 +116,10 @@ public:
 //		Robotc(1, 2),
 		driveStick(0),
 		driveThumb( &driveStick , 2 ),
-		driverStickB5( &driveStick , 5 ),
-		driverStickB6( &driveStick , 6 ),
-		driverStickB3( &driveStick , 3 ),
-		driverStickB4( &driveStick , 4 ),
+		driverB5( &driveStick , 5 ),
+		driverB6( &driveStick , 6 ),
+		driverB3( &driveStick , 3 ),
+		driverB4( &driveStick , 4 ),
 
 		operatorStick(1),
 		operatorThumb( &operatorStick , 2 ),
@@ -345,9 +345,56 @@ public:
 
 		// Stop all movement and reset PID controls3
 
-		if (teleSelected == teleNameCustom0)
+		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
 			if ( driveThumb.Get() )
+
+			{
+					KillDrive();
+			}
+			else
+			{
+				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
+			}
+			if ( driveStick.GetPOV() != -1 )
+			{
+				targetAngle = ModAngle( -driveStick.GetPOV() );
+			}
+
+			if (driverB5.Get())
+			{
+				arm.Set(0.5);
+			}
+			else if (driverB6.Get())
+			{
+				arm.Set(-0.5);
+			}
+			else
+			{
+				arm.Set(0);
+			}
+			if (driverB3.Get())
+			{
+				throwHigh.Set((driveStick.GetRawAxis(3)+1)/2);
+				throwLow.Set((driveStick.GetRawAxis(3)+1)/2);
+			}
+			else if (operatorB4.Get())
+			{
+				throwHigh.Set(-(driveStick.GetRawAxis(3)+1)/2);
+				throwLow.Set(-(driveStick.GetRawAxis(3)+1)/2);
+			}
+			else
+			{
+				throwHigh.Set(0);
+				throwLow.Set(0);
+			}
+
+			TrackAccel();	// must be called at the end of the periodic loop
+		}
+		else			//Default Tele Code "Both Sticks"
+		{
+			if ( driveThumb.Get() )
+
 			{
 				KillDrive();
 			}
@@ -387,12 +434,8 @@ public:
 				throwLow.Set(0);
 			}
 
-			TrackAccel();	// must be called at the end of the periodic loop
-		}
-		else
-		{
-			std::cout<<"error: invalid teleop name"<< std::endl;
-		}
+				TrackAccel();	// must be called at the end of the periodic loop
+			}
 	}
 
 	void TestPeriodic()
