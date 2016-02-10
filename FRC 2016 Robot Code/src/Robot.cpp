@@ -391,8 +391,49 @@ public:
 		}
 		else
 		{
-			std::cout<<"FAIL!!"<< std::endl;
-		}
+			if ( driveThumb.Get() )
+
+			{
+				KillDrive();
+			}
+			else
+			{
+				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
+			}
+			if ( driveStick.GetPOV() != -1 )
+			{
+				targetAngle = ModAngle( -driveStick.GetPOV() );
+			}
+			if (operatorB5.Get())
+			{
+				arm.Set(0.5);
+			}
+			else if (operatorB6.Get())
+			{
+				arm.Set(-0.5);
+			}
+			else
+			{
+				arm.Set(0);
+			}
+			if (operatorB3.Get())
+			{
+				throwHigh.Set((operatorStick.GetRawAxis(3)+1)/2);
+				throwLow.Set((operatorStick.GetRawAxis(3)+1)/2);
+			}
+			else if (operatorB4.Get())
+			{
+				throwHigh.Set(-(operatorStick.GetRawAxis(3)+1)/2);
+				throwLow.Set(-(operatorStick.GetRawAxis(3)+1)/2);
+			}
+			else
+			{
+				throwHigh.Set(0);
+				throwLow.Set(0);
+			}
+
+				TrackAccel();	// must be called at the end of the periodic loop
+			}
 	}
 
 	void TestPeriodic()
