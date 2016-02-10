@@ -77,36 +77,46 @@ class Robot: public IterativeRobot
 
 	std::string teleSelected;
 
-	Timer timer;
+	Timer	timer;
 //	RobotDrive Robotc;
-	Joystick driveStick;
-	JoystickButton driveThumb;
-	JoystickButton driverB5;
-	JoystickButton driverB6;
-	JoystickButton driverB3;
-	JoystickButton driverB4;
+	Joystick		driveStick;
+	JoystickButton	driveThumb;
+	JoystickButton	driverB3;
+	JoystickButton	driverB4;
+	JoystickButton	driverB5;
+	JoystickButton	driverB6;
+	JoystickButton	driverB7;
+	JoystickButton	driverB8;
+	JoystickButton	driverB9;
+	JoystickButton	driverB10;
+	JoystickButton	driverB11;
+	JoystickButton	driverB12;
 
-	Joystick operatorStick;
+	Joystick		operatorStick;
 	JoystickButton	operatorThumb;
-	JoystickButton operatorB5;
-	JoystickButton operatorB6;
-	JoystickButton operatorB3;
-	JoystickButton operatorB4;
+	JoystickButton	operatorB3;
+	JoystickButton	operatorB4;
+	JoystickButton	operatorB5;
+	JoystickButton	operatorB6;
+	JoystickButton	operatorB7;
+	JoystickButton	operatorB8;
+	JoystickButton	operatorB9;
+	JoystickButton	operatorB10;
+	JoystickButton	operatorB11;
+	JoystickButton	operatorB12;
 
-	CANTalon driveLeft;
-	CANTalon driveRight;
-	CANTalon arm;
-	CANTalon throwLow;
-	CANTalon throwHigh;
-	AnalogGyro gyro;
-	ADXL345_I2C accel;
+	CANTalon		driveLeft;
+	CANTalon		driveRight;
+	CANTalon		arm;
+	CANTalon		throwLow;
+	CANTalon		throwHigh;
+	AnalogGyro		gyro;
+	ADXL345_I2C		accel;
+	CameraServer	Cam;
 
-	JoystickButton JoyL;
-	JoystickButton JoyR;
-
-	Relay *AR = new Relay(0);
-	Relay *AL = new Relay(1);
-	DoubleSolenoid *Piston = new DoubleSolenoid(0, 1);
+	Relay	*AR = new Relay(0);
+	Relay	*AL = new Relay(1);
+	DoubleSolenoid	*Piston = new DoubleSolenoid(0, 1);
 
 //	const char *JAVA = "/usr/local/frc/JRE/bin/java";
 //	char *GRIP_ARGS[5] = {"java", "-jar", "/home/lvuser/grip.jar", "/home/lvuser/project.grip", NULL };
@@ -114,36 +124,42 @@ class Robot: public IterativeRobot
 public:
 	Robot():
 //		Robotc(1, 2),
-		driveStick(0),
-		driveThumb( &driveStick , 2 ),
-		driverB5( &driveStick , 5 ),
-		driverB6( &driveStick , 6 ),
-		driverB3( &driveStick , 3 ),
-		driverB4( &driveStick , 4 ),
+		driveStick		( 0 ),
+		driveThumb		( &driveStick , 2 ),
+		driverB3		( &driveStick , 3 ),
+		driverB4		( &driveStick , 4 ),
+		driverB5		( &driveStick , 5 ),
+		driverB6		( &driveStick , 6 ),
+		driverB7		( &driveStick , 7 ),
+		driverB8		( &driveStick , 8 ),
+		driverB9		( &driveStick , 9 ),
+		driverB10		( &driveStick , 10 ),
+		driverB11		( &driveStick , 11 ),
+		driverB12		( &driveStick , 12 ),
 
-		operatorStick(1),
-		operatorThumb( &operatorStick , 2 ),
-		operatorB5( &operatorStick , 5 ),
-		operatorB6( &operatorStick , 6 ),
-		operatorB3( &operatorStick , 3 ),
-		operatorB4( &operatorStick , 4 ),
+		operatorStick	( 1 ),
+		operatorThumb	( &operatorStick , 2 ),
+		operatorB3		( &operatorStick , 3 ),
+		operatorB4		( &operatorStick , 4 ),
+		operatorB5		( &operatorStick , 5 ),
+		operatorB6		( &operatorStick , 6 ),
+		operatorB7		( &operatorStick , 7 ),
+		operatorB8		( &operatorStick , 8 ),
+		operatorB9		( &operatorStick , 9 ),
+		operatorB10		( &operatorStick , 10 ),
+		operatorB11		( &operatorStick , 11 ),
+		operatorB12		( &operatorStick , 12 ),
 
-		driveLeft(1),
-		driveRight(2),
-		arm(4),
-		throwHigh(3),
-		throwLow(5),
-		gyro(0),
-		JoyL(&driveStick,4),
-		JoyR(&driveStick,5),
-		autoChooser(),
-		teleChooser(),
-		accel(I2C::Port::kOnboard)
-
+		driveLeft		( 1 ),
+		driveRight		( 2 ),
+		arm				( 4 ),
+		throwHigh		( 3 ),
+		throwLow		( 5 ),
+		gyro			( 0 ),
+		autoChooser		( ),
+		teleChooser		( ),
+		accel			( I2C::Port::kOnboard )
 	{}
-
-
-
 
 	void RobotInit()
 	{
@@ -353,6 +369,7 @@ public:
 
 		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
+
 			if ( driveThumb.Get() )
 			{
 				KillDrive();
@@ -361,6 +378,7 @@ public:
 			{
 				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
 			}
+
 			if ( driveStick.GetPOV() != -1 )
 			{
 				targetAngle = ModAngle( -driveStick.GetPOV() );
@@ -378,6 +396,7 @@ public:
 			{
 				arm.Set(0);
 			}
+
 			if (driverB3.Get())
 			{
 				throwHigh.Set((driveStick.GetRawAxis(3)+1)/2);
@@ -398,8 +417,8 @@ public:
 		}
 		else			//Default Tele Code "Both Sticks"
 		{
-			if ( driveThumb.Get() )
 
+			if ( driveThumb.Get() )
 			{
 				KillDrive();
 			}
@@ -407,14 +426,17 @@ public:
 			{
 				SmoothTankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
 			}
+
 			if ( driveStick.GetPOV() != -1 )
 			{
 				targetAngle = ModAngle( -driveStick.GetPOV() );
 			}
+
 			if (operatorB5.Get())
 			{
 				arm.Set(0.5);
 			}
+
 			else if (operatorB6.Get())
 			{
 				arm.Set(-0.5);
@@ -423,6 +445,7 @@ public:
 			{
 				arm.Set(0);
 			}
+
 			if (operatorB3.Get())
 			{
 				throwHigh.Set((operatorStick.GetRawAxis(3)+1)/2);
@@ -450,8 +473,7 @@ public:
 
 	/* Kill Functions */
 
-	/*
-	 * Unconditionally stop all motors and reset control variables.
+	/* Unconditionally stop all motors and reset control variables.
 	 */
 	void	KillAll ()
 	{
@@ -462,10 +484,14 @@ public:
 		drivePower		=	0;
 		turnPower		=	0;
 		TurnPIDReset();
+
+		throwHigh.Set	(	0	);
+		throwLow.Set	(	0	);
+
+		arm.Set			(	0	);
 	}
 
-	/*
-	 * Unconditionally stop all drive motors and reset drive control variables.
+	/* Unconditionally stop all drive motors and reset drive control variables.
 	 */
 	void	KillDrive ()
 	{
