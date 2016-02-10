@@ -78,7 +78,7 @@ class Robot: public IterativeRobot
 	std::string teleSelected;
 
 	Timer timer;
-	RobotDrive Robotc;
+//	RobotDrive Robotc;
 	Joystick driveStick;
 	Joystick oppStick;
 	JoystickButton driveThumb;
@@ -105,12 +105,12 @@ class Robot: public IterativeRobot
 	Relay *AL = new Relay(1);
 	DoubleSolenoid *Piston = new DoubleSolenoid(0, 1);
 
-	const char *JAVA = "/usr/local/frc/JRE/bin/java";
-	char *GRIP_ARGS[5] = {"java", "-jar", "/home/lvuser/grip.jar", "/home/lvuser/project.grip", NULL };
+//	const char *JAVA = "/usr/local/frc/JRE/bin/java";
+//	char *GRIP_ARGS[5] = {"java", "-jar", "/home/lvuser/grip.jar", "/home/lvuser/project.grip", NULL };
 
 public:
 	Robot():
-		Robotc(1, 2),
+//		Robotc(1, 2),
 		driveStick(0),
 		oppStick(1),
 		driveThumb( &driveStick , 2 ),
@@ -151,21 +151,21 @@ public:
 		SmartDashboard::PutData("Auto Modes", autoChooser);
 
 		teleChooser = new SendableChooser();
-		teleChooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
-		teleChooser->AddObject(autoNameCustom0, (void*)&autoNameCustom0);
+		teleChooser->AddDefault(teleNameDefault, (void*)&teleNameDefault);
+		teleChooser->AddObject(teleNameCustom0, (void*)&teleNameCustom0);
 
-		SmartDashboard::PutData("Auto Modes", teleChooser);
+		SmartDashboard::PutData("Tele Modes", teleChooser);
 
 		AR->Set(Relay::Value::kOff);
 		AL->Set(Relay::Value::kOff);
 
-		if (fork() == 0)						//Creating process for grip and testing if it fails
-		{
-			if (execv(JAVA, GRIP_ARGS) == -1)
-			{
-				perror("Error running GRIP");
-		    }
-		}
+//		if (fork() == 0)						//Creating process for grip and testing if it fails
+//		{
+//			if (execv(JAVA, GRIP_ARGS) == -1)
+//			{
+//				perror("Error running GRIP");
+//		    }
+//		}
 
 		timer.Start();
 
@@ -321,12 +321,12 @@ public:
 
 	void TeleopPeriodic()
 	{
-		std::cout<< "\ndist = ";
-		std::cout<< distance;
-		std::cout<< "\tspeed = ";
-		std::cout<< speed;
-		std::cout<< "\taccel = ";
-		std::cout<< accel.GetY();
+//		std::cout<< "\ndist = ";
+//		std::cout<< distance;
+//		std::cout<< "\tspeed = ";
+//		std::cout<< speed;
+//		std::cout<< "\taccel = ";
+//		std::cout<< accel.GetY();
 
 //		std::cout<< "\nangle = ";
 //		std::cout<< gyro.GetAngle();
@@ -342,49 +342,52 @@ public:
 		if (teleSelected == teleNameCustom0)
 		{
 			if ( driveThumb.Get() )
-					{
-						KillDrive();
-					}
-					else
-					{
-						TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
-					}
 
-					if ( driveStick.GetPOV() != -1 ) {
-						targetAngle = ModAngle( -driveStick.GetPOV() );
-					}
+			{
+					KillDrive();
+			}
+			else
+			{
+				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
+			}
 
-					if (oppThumbLU.Get())
-					{
-						arm.Set(0.5);
-					}
-					else if (oppThumbRU.Get())
-					{
-						arm.Set(-0.5);
-					}
-					else
-					{
-						arm.Set(0);
-					}
-					if (oppThumbLD.Get())
-					{
-						throwHigh.Set((oppStick.GetRawAxis(3)+1)/2);
-						throwLow.Set((oppStick.GetRawAxis(3)+1)/2);
-					}
-					else if (oppThumbRD.Get())
-					{
-						throwHigh.Set(-(oppStick.GetRawAxis(3)+1)/2);
-						throwLow.Set(-(oppStick.GetRawAxis(3)+1)/2);
-					}
-					else
-					{
-						throwHigh.Set(0);
-						throwLow.Set(0);
-					}
+			if ( driveStick.GetPOV() != -1 ) {
+				targetAngle = ModAngle( -driveStick.GetPOV() );
+			}
 
-					TrackAccel();	// must be called at the end of the periodic loop
+			if (oppThumbLU.Get())
+			{
+				arm.Set(0.5);
+			}
+			else if (oppThumbRU.Get())
+			{
+				arm.Set(-0.5);
+			}
+			else
+			{
+				arm.Set(0);
+			}
+			if (oppThumbLD.Get())
+			{
+				throwHigh.Set((oppStick.GetRawAxis(3)+1)/2);
+				throwLow.Set((oppStick.GetRawAxis(3)+1)/2);
+			}
+			else if (oppThumbRD.Get())
+			{
+				throwHigh.Set(-(oppStick.GetRawAxis(3)+1)/2);
+				throwLow.Set(-(oppStick.GetRawAxis(3)+1)/2);
+			}
+			else
+			{
+				throwHigh.Set(0);
+				throwLow.Set(0);
+			}
 
-
+			TrackAccel();	// must be called at the end of the periodic loop
+		}
+		else
+		{
+			std::cout<<"FAIL!!"<< std::endl;
 		}
 	}
 
