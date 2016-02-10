@@ -348,9 +348,8 @@ public:
 		if (teleSelected == teleNameCustom0)
 		{
 			if ( driveThumb.Get() )
-
 			{
-					KillDrive();
+				KillDrive();
 			}
 			else
 			{
@@ -360,7 +359,6 @@ public:
 			{
 				targetAngle = ModAngle( -driveStick.GetPOV() );
 			}
-
 			if (operatorB5.Get())
 			{
 				arm.Set(0.5);
@@ -393,7 +391,7 @@ public:
 		}
 		else
 		{
-			std::cout<<"FAIL!!"<< std::endl;
+			std::cout<<"error: invalid teleop name"<< std::endl;
 		}
 	}
 
