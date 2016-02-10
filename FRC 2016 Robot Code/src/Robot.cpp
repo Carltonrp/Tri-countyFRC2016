@@ -80,16 +80,18 @@ class Robot: public IterativeRobot
 	Timer timer;
 //	RobotDrive Robotc;
 	Joystick driveStick;
-	Joystick oppStick;
 	JoystickButton driveThumb;
-	JoystickButton oppThumbLU;
-	JoystickButton oppThumbRU;
-	JoystickButton oppThumbLD;
-	JoystickButton oppThumbRD;
-	JoystickButton driveThumbLU;
-	JoystickButton driveThumbRU;
-	JoystickButton driveThumbLD;
-	JoystickButton driveThumbRD;
+	JoystickButton driverStickB5;
+	JoystickButton driverStickB6;
+	JoystickButton driverStickB3;
+	JoystickButton driverStickB4;
+
+	Joystick operatorStick;
+	JoystickButton operatorB5;
+	JoystickButton operatorB6;
+	JoystickButton operatorB3;
+	JoystickButton operatorB4;
+
 	CANTalon driveLeft;
 	CANTalon driveRight;
 	CANTalon arm;
@@ -112,16 +114,18 @@ public:
 	Robot():
 //		Robotc(1, 2),
 		driveStick(0),
-		oppStick(1),
 		driveThumb( &driveStick , 2 ),
-		oppThumbLU( &oppStick , 5 ),
-		oppThumbRU( &oppStick , 6 ),
-		oppThumbLD( &oppStick , 3 ),
-		oppThumbRD( &oppStick , 4 ),
-		driveThumbLU( &driveStick , 5 ),
-		driveThumbRU( &driveStick , 6 ),
-		driveThumbLD( &driveStick , 3 ),
-		driveThumbRD( &driveStick , 4 ),
+		driverStickB5( &driveStick , 5 ),
+		driverStickB6( &driveStick , 6 ),
+		driverStickB3( &driveStick , 3 ),
+		driverStickB4( &driveStick , 4 ),
+
+		operatorStick(1),
+		operatorB5( &operatorStick , 5 ),
+		operatorB6( &operatorStick , 6 ),
+		operatorB3( &operatorStick , 3 ),
+		operatorB4( &operatorStick , 4 ),
+
 		driveLeft(1),
 		driveRight(2),
 		arm(4),
@@ -350,17 +354,16 @@ public:
 			{
 				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
 			}
-
-					if ( driveStick.GetPOV() != -1 )
-					{
+			if ( driveStick.GetPOV() != -1 )
+			{
 				targetAngle = ModAngle( -driveStick.GetPOV() );
 			}
 
-			if (oppThumbLU.Get())
+			if (operatorB5.Get())
 			{
 				arm.Set(0.5);
 			}
-			else if (oppThumbRU.Get())
+			else if (operatorB6.Get())
 			{
 				arm.Set(-0.5);
 			}
@@ -368,15 +371,15 @@ public:
 			{
 				arm.Set(0);
 			}
-			if (oppThumbLD.Get())
+			if (operatorB3.Get())
 			{
-				throwHigh.Set((oppStick.GetRawAxis(3)+1)/2);
-				throwLow.Set((oppStick.GetRawAxis(3)+1)/2);
+				throwHigh.Set((operatorStick.GetRawAxis(3)+1)/2);
+				throwLow.Set((operatorStick.GetRawAxis(3)+1)/2);
 			}
-			else if (oppThumbRD.Get())
+			else if (operatorB4.Get())
 			{
-				throwHigh.Set(-(oppStick.GetRawAxis(3)+1)/2);
-				throwLow.Set(-(oppStick.GetRawAxis(3)+1)/2);
+				throwHigh.Set(-(operatorStick.GetRawAxis(3)+1)/2);
+				throwLow.Set(-(operatorStick.GetRawAxis(3)+1)/2);
 			}
 			else
 			{
