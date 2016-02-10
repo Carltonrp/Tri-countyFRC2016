@@ -353,7 +353,7 @@ public:
 			}
 			else
 			{
-				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
+				SmoothTankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
 			}
 			if ( driveStick.GetPOV() != -1 )
 			{
