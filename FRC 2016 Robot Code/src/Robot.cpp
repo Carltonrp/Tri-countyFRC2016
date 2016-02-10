@@ -100,7 +100,6 @@ class Robot: public IterativeRobot
 	CANTalon throwHigh;
 	AnalogGyro gyro;
 	ADXL345_I2C accel;
-	CameraServer Cam;
 
 	JoystickButton JoyL;
 	JoystickButton JoyR;
@@ -139,8 +138,8 @@ public:
 		JoyR(&driveStick,5),
 		autoChooser(),
 		teleChooser(),
-		accel(I2C::Port::kOnboard),
-		Cam()
+		accel(I2C::Port::kOnboard)
+
 	{}
 
 
