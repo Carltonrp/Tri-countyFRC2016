@@ -54,6 +54,7 @@ double	distance						=	0;
 bool	tracking						=	false;
 
 double times;
+double aTimer;
 
 double accelX;
 double accelY;
@@ -67,11 +68,14 @@ class Robot: public IterativeRobot
 	SendableChooser	*teleChooser;
 	const std::string	autoNameDefault = "Default";
 
-	const std::string	autoNameCustom0 = "Auto0";
-	const std::string	autoNameCustom1 = "Auto1";
-	const std::string	autoNameCustom2 = "Auto2";
-	const std::string	autoNameCustom3 = "Auto3";
-	const std::string	autoNameCustom4 = "Auto4";
+	const std::string	autoNameRamparts = "Ramparts";
+	const std::string	autoNameLowbar = "Lowbar";
+	const std::string	autoNameRoughTerrain = "Rough Terrain";
+	const std::string	autoNameSallyGate = "Sally Gate";
+	const std::string	autoNameTheFrenchOne = "The French One";
+	const std::string	autoNameDrawBridge = "Draw Bridge";
+	const std::string	autoNameMoat = "Moat";
+	const std::string	autoNameRockWall = "Rock Wall";
 
 	std::string autoSelected;
 
@@ -82,6 +86,7 @@ class Robot: public IterativeRobot
 	std::string teleSelected;
 
 	Timer	timer;
+	Timer 	autoTimer;
 //	RobotDrive Robotc;
 	Joystick		driveStick;
 	JoystickButton	driverTrigger;
@@ -173,11 +178,14 @@ public:
 	{
 		autoChooser = new SendableChooser();
 		autoChooser->AddDefault(autoNameDefault, (void*)&autoNameDefault);
-		autoChooser->AddObject(autoNameCustom0, (void*)&autoNameCustom0);
-		autoChooser->AddObject(autoNameCustom1, (void*)&autoNameCustom1);
-		autoChooser->AddObject(autoNameCustom2, (void*)&autoNameCustom2);
-		autoChooser->AddObject(autoNameCustom3, (void*)&autoNameCustom3);
-		autoChooser->AddObject(autoNameCustom4, (void*)&autoNameCustom4);
+		autoChooser->AddObject(autoNameRamparts, (void*)&autoNameRamparts);
+		autoChooser->AddObject(autoNameLowbar, (void*)&autoNameLowbar);
+		autoChooser->AddObject(autoNameRoughTerrain, (void*)&autoNameRoughTerrain);
+		autoChooser->AddObject(autoNameSallyGate, (void*)&autoNameSallyGate);
+		autoChooser->AddObject(autoNameTheFrenchOne, (void*)&autoNameTheFrenchOne);
+		autoChooser->AddObject(autoNameDrawBridge, (void*)&autoNameDrawBridge);
+		autoChooser->AddObject(autoNameMoat, (void*)&autoNameMoat);
+		autoChooser->AddObject(autoNameRockWall, (void*)&autoNameRockWall);
 
 		SmartDashboard::PutData("Auto Modes", autoChooser);
 
@@ -230,31 +238,51 @@ public:
 		Piston->Set(DoubleSolenoid::Value::kOff);
 		AR->Set(Relay::Value::kOn);
 		AL->Set(Relay::Value::kOff);
+		autoTimer.Reset();
+		autoTimer.Start();
 
 		autoSelected = *((std::string*)autoChooser->GetSelected());
 		std::string autoSelected = SmartDashboard::GetString("Auto Selector", autoNameDefault);
 		std::cout << "Auto selected: " << autoSelected << std::endl;
-		if(autoSelected == autoNameCustom0)
+
+		if(autoSelected == autoNameDefault)
 		{
 			KillAll();
 		}
-		else if(autoSelected == autoNameCustom1)
+		else if(autoSelected == autoNameRamparts)
 		{
 			KillAll();
 		}
-		else if(autoSelected == autoNameCustom2)
+		else if(autoSelected == autoNameLowbar)
 		{
 			KillAll();
 		}
-		else if(autoSelected == autoNameCustom3)
+		else if(autoSelected == autoNameRoughTerrain)
 		{
 			KillAll();
 		}
-		else if(autoSelected == autoNameCustom4)
+		else if(autoSelected == autoNameSallyGate)
+		{
+			KillAll();
+		}
+		else if(autoSelected == autoNameTheFrenchOne)
+		{
+			KillAll();
+		}
+		else if(autoSelected == autoNameDrawBridge)
+		{
+			KillAll();
+		}
+		else if(autoSelected == autoNameMoat)
+		{
+			KillAll();
+		}
+		else if(autoSelected == autoNameRockWall)
 		{
 			KillAll();
 		}
 		else
+
 		{
 			KillAll();
 		}
@@ -262,24 +290,50 @@ public:
 
 	void AutonomousPeriodic()
 	{
-		times = timer.Get();
-		if(autoSelected == autoNameCustom0)
+		aTimer = autoTimer.Get();
+
+		if(autoSelected == autoNameDefault)
 		{
 			AutoDrive( 2000 , -.2 );
 		}
-		else if(autoSelected == autoNameCustom1)
+		else if(autoSelected == autoNameRamparts)
 		{
 			KillAll();
 		}
-		else if(autoSelected == autoNameCustom2)
+		else if(autoSelected == autoNameLowbar)  //Hardwire for lowbar
+		{
+			if ((aTimer > 0) && (aTimer < 5))
+			{
+				std::cout << "times = " << aTimer << std::endl;
+//				driveLeft.Set(0.5);
+//				driveRight.Set(-0.5);
+			}
+			else
+			{
+				KillAll();
+			}
+		}
+		else if(autoSelected == autoNameRoughTerrain)
 		{
 			KillAll();
 		}
-		else if(autoSelected == autoNameCustom3)
+		else if(autoSelected == autoNameSallyGate)
 		{
 			KillAll();
 		}
-		else if(autoSelected == autoNameCustom4)
+		else if(autoSelected == autoNameTheFrenchOne)
+		{
+			KillAll();
+		}
+		else if(autoSelected == autoNameDrawBridge)
+		{
+			KillAll();
+		}
+		else if(autoSelected == autoNameMoat)
+		{
+			KillAll();
+		}
+		else if(autoSelected == autoNameRockWall)
 		{
 			KillAll();
 		}
@@ -306,14 +360,14 @@ public:
 //			}
 
 
-			std::cout<<"\n cal = ";
-			std::cout<<ACCEL_CALIBRATION;
-			std::cout<<"\t accel = ";
-			std::cout<<accel.GetY();
-			std::cout<<"\t speed = ";
-			std::cout<<speed;
-			std::cout<<"\t dist = ";
-			std::cout<<distance;
+//			std::cout<<"\n cal = ";
+//			std::cout<<ACCEL_CALIBRATION;
+//			std::cout<<"\t accel = ";
+//			std::cout<<accel.GetY();
+//			std::cout<<"\t speed = ";
+//			std::cout<<speed;
+//			std::cout<<"\t dist = ";
+//			std::cout<<distance;
 
 			TrackAccel();
 		}
