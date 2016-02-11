@@ -80,7 +80,8 @@ class Robot: public IterativeRobot
 	Timer	timer;
 //	RobotDrive Robotc;
 	Joystick		driveStick;
-	JoystickButton	driveThumb;
+	JoystickButton	driverTrigger;
+	JoystickButton	driverThumb;
 	JoystickButton	driverB3;
 	JoystickButton	driverB4;
 	JoystickButton	driverB5;
@@ -93,6 +94,7 @@ class Robot: public IterativeRobot
 	JoystickButton	driverB12;
 
 	Joystick		operatorStick;
+	JoystickButton	operatorTrigger;
 	JoystickButton	operatorThumb;
 	JoystickButton	operatorB3;
 	JoystickButton	operatorB4;
@@ -125,7 +127,8 @@ public:
 	Robot():
 //		Robotc(1, 2),
 		driveStick		( 0 ),
-		driveThumb		( &driveStick , 2 ),
+		driverTrigger	( &driveStick , 1 ),
+		driverThumb		( &driveStick , 2 ),
 		driverB3		( &driveStick , 3 ),
 		driverB4		( &driveStick , 4 ),
 		driverB5		( &driveStick , 5 ),
@@ -138,6 +141,7 @@ public:
 		driverB12		( &driveStick , 12 ),
 
 		operatorStick	( 1 ),
+		operatorTrigger	( &driveStick , 1 ),
 		operatorThumb	( &operatorStick , 2 ),
 		operatorB3		( &operatorStick , 3 ),
 		operatorB4		( &operatorStick , 4 ),
@@ -257,7 +261,7 @@ public:
 		times = timer.Get();
 		if(autoSelected == autoNameCustom0)
 		{
-			AutoDrive( 200 , -.2 );
+			AutoDrive( 2000 , -.2 );
 		}
 		else if(autoSelected == autoNameCustom1)
 		{
@@ -370,9 +374,13 @@ public:
 		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
 
-			if ( driveThumb.Get() )
+			if ( driverThumb.Get() )
 			{
 				KillDrive();
+			}
+			else if ( driverTrigger.Get() )
+			{
+				KeepAngle( 0 , driveStick.GetRawAxis(1) );
 			}
 			else
 			{
@@ -417,8 +425,7 @@ public:
 		}
 		else			//Default Tele Code "Both Sticks"
 		{
-
-			if ( driveThumb.Get() )
+			if ( driverThumb.Get() )
 			{
 				KillDrive();
 			}
