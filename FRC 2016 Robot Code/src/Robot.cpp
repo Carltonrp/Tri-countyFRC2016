@@ -112,7 +112,7 @@ class Robot: public IterativeRobot
 	CANTalon		throwHigh;
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
-	CameraServer	Cam;
+
 
 	Relay	*AR = new Relay(0);
 	Relay	*AL = new Relay(1);
