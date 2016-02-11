@@ -11,12 +11,12 @@ const double	ANGLE_TOLERANCE			=	0.1;
 
 const double	TURN_P_GAIN				=	1;
 const double	TURN_I_GAIN				=	0.5;
-const double	TURN_D_GAIN				=	6;
+const double	TURN_D_GAIN				=	2;
 const double	TURN_K					=	0.001;
 
 const double	PITCH_P_GAIN			=	1;
 const double	PITCH_I_GAIN			=	0.5;
-const double	PITCH_D_GAIN			=	6;
+const double	PITCH_D_GAIN			=	2;
 const double	PITCH_K					=	0.001;
 
 double	ACCEL_CALIBRATION				=	0;
@@ -373,7 +373,7 @@ public:
 
 		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
-
+			std::cout<<GetAngle()<<std::endl;
 			if ( driverThumb.Get() )
 			{
 				KillDrive();
@@ -420,7 +420,6 @@ public:
 				throwHigh.Set(0);
 				throwLow.Set(0);
 			}
-
 			TrackAccel();	// must be called at the end of the periodic loop
 		}
 		else			//Default Tele Code "Both Sticks"
@@ -706,7 +705,7 @@ public:
 
 	double	GetAngle	()
 	{
-		return ModAngle( gyro.GetAngle() );
+		return -ModAngle( gyro.GetAngle() );
 	}
 
 	double	AngularDifference	( double left , double right )
