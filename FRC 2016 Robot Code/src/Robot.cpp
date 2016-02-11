@@ -9,10 +9,14 @@ const double	DRIVE_DEADZONE			=	0.05;
 const double	DRIVE_X_TOLERANCE		=	0.05;
 const double	ANGLE_TOLERANCE			=	0.1;
 
-const double	TURN_P_GAIN				=	1;
-const double	TURN_I_GAIN				=	0.5;
-const double	TURN_D_GAIN				=	2;
+const double	TURN_P_GAIN				=	1.0;
+const double	TURN_I_GAIN				=	0.05;
+const double	TURN_D_GAIN				=	2.0;
 const double	TURN_K					=	0.001;
+
+const double	TURN_P_MAX				=	45;
+const double	TURN_I_MAX				=	360;
+const double	TURN_D_MAX				=	360;
 
 const double	PITCH_P_GAIN			=	1;
 const double	PITCH_I_GAIN			=	0.5;
@@ -373,7 +377,7 @@ public:
 
 		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
-			std::cout<<GetAngle()<<std::endl;
+			std::cout<<AngularDifference( 0 , GetAngle() )<<std::endl;
 			if ( driverThumb.Get() )
 			{
 				KillDrive();
@@ -566,7 +570,7 @@ public:
 	void	KeepAngle	( double _targetAngle , double _drive )
 	{
 		// calculate angle deviation
-		double _currentAngleDeviation = AngularDifference( GetAngle() , _targetAngle );
+		double _currentAngleDeviation = AngularDifference( _targetAngle , GetAngle() );
 
 		// increment interval
 		turnInterval++;
@@ -607,10 +611,8 @@ public:
 			}
 			else
 			{
-
-			driveStraight = true;
-			KeepAngle( 0 , _y );
-
+				driveStraight = true;
+				KeepAngle( 0 , _y );
 				driveStraight = true;
 				KeepAngle( 0 , _y );
 			}
@@ -705,7 +707,7 @@ public:
 
 	double	GetAngle	()
 	{
-		return -ModAngle( gyro.GetAngle() );
+		return ModAngle( gyro.GetAngle() );
 	}
 
 	double	AngularDifference	( double left , double right )
@@ -715,7 +717,7 @@ public:
 		std::cout<<"-";
 		std::cout<<right;
 		std::cout<<"=";
-		std::cout<<ModAngle( left - right );
+		std::cout<<ModAngle( left - right )<<std::endl;
 		return ModAngle( left - right );
 	}
 
