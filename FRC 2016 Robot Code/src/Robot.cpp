@@ -123,6 +123,9 @@ class Robot: public IterativeRobot
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
 
+	Encoder			encoderLeft;
+	Encoder			encoderRight;
+
 //	DigitalOutput Guide;
 
 
@@ -172,7 +175,10 @@ public:
 		gyro			( 0 ),
 		autoChooser		( ),
 		teleChooser		( ),
-		accel			( I2C::Port::kOnboard )
+		accel			( I2C::Port::kOnboard ),
+
+		encoderLeft		( 6 , 7 ),
+		encoderRight	( 8 , 9 )
 	{}
 
 	void RobotInit()
@@ -379,7 +385,7 @@ public:
 //			std::cout<<"\t dist = ";
 //			std::cout<<distance;
 
-			TrackAccel();
+			update();	// must be called at the end of the periodic loop
 		}
 
 //		TankDrive(gyro.GetAngle()/90,0);
@@ -405,7 +411,7 @@ public:
 //		std::cout<< "\trate = ";
 //		std::cout<< gyro.GetRate();
 
-		TrackAccel();	// must be called at the end of the periodic loop
+		update();	// must be called at the end of the periodic loop
 	}
 
 	void TeleopInit()
@@ -442,7 +448,9 @@ public:
 
 		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
-			std::cout<<AngularDifference( 0 , GetAngle() )<<std::endl;
+//			std::cout<<AngularDifference( 0 , GetAngle() )<<std::endl;
+//			std::cout<<encoderLeft1.Get()<<"\t"<<encoderLeft2.Get()<<std::endl;
+
 			if ( driverThumb.Get() )
 			{
 				KillDrive();
@@ -502,7 +510,7 @@ public:
 //				Guide.Set(0);
 			}
 
-			TrackAccel();	// must be called at the end of the periodic loop
+			update();	// must be called at the end of the periodic loop
 		}
 		else			//Default Tele Code "Both Sticks"
 		{
@@ -550,7 +558,7 @@ public:
 				throwLow.Set(0);
 			}
 
-				TrackAccel();	// must be called at the end of the periodic loop
+			update();	// must be called at the end of the periodic loop
 			}
 	}
 
@@ -717,7 +725,7 @@ public:
 		}
 		if ( autoDriveState == 1 )
 		{
-			TrackAccel();
+			update();
 			double	distanceRemaining	=	_targetDistance - distance;
 			//
 			if ( distanceRemaining < 0 )
@@ -807,24 +815,12 @@ public:
 		turnInterval	=	0;
 	}
 
-	/* ACCELEROMETER FUNCTIONS */
+	/* ENCODER FUNCTIONS */
 	void	DistanceReset	()
 	{
 		distance	=	0;
 	}
 
-	void	TrackAccel	()
-	{
-		if ( tracking )
-		{
-			double _time = timer.Get();
-			acceleration	=	accel.GetY() - ACCEL_CALIBRATION;
-			speed			+=	_time * acceleration;
-			distance		+=	_time * speed;
-			timer.Reset();
-		}
-		tracking = true;
-	}
 	/* THROWER CONTROL FUNCTIONS */
 	void	setPitch	( double _target )
 	{
@@ -841,6 +837,26 @@ public:
 			arm.Set( 0 );
 			std::cout<<"error in 'setPitch': target out of range";
 		}
+	}
+
+	/* SENSORS */
+
+	double	distanceLeft	=	0;
+	double	distanceRight	=	0;
+
+	void	update	()
+	{
+		if ( tracking )
+		{
+			std::cout<<distanceLeft<<"\t"<<distanceRight<<std::endl;
+			distanceLeft	=	encoderLeft.GetDistance();
+			distanceRight	=	encoderRight.GetDistance();
+			double _time	=	timer.Get();
+			acceleration	=	accel.GetY() - ACCEL_CALIBRATION;
+			speed			+=	_time * acceleration;
+			timer.Reset();
+		}
+		tracking = true;
 	}
 };
 
