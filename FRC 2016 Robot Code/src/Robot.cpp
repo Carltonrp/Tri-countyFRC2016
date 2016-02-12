@@ -124,7 +124,7 @@ class Robot: public IterativeRobot
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
 
-	DigitalOutput Guide;
+//	DigitalOutput Guide;
 
 
 	Relay	*AR = new Relay(0);
@@ -307,8 +307,8 @@ public:
 			if ((aTimer > 0) && (aTimer < 5))
 			{
 				std::cout << "times = " << aTimer << std::endl;
-//				driveLeft.Set(0.5);
-//				driveRight.Set(-0.5);
+				driveLeft.Set(0.5);
+				driveRight.Set(-0.5);
 			}
 			else
 			{
@@ -482,15 +482,15 @@ public:
 			}
 			if (driverB11.Get())
 			{
-				Guide.Set(1);
+//				Guide.Set(1);
 			}
 			else if (driverB12.Get())
 			{
-				Guide.Set(-1);
+//				Guide.Set(-1);
 			}
 			else
 			{
-				Guide.Set(0);
+//				Guide.Set(0);
 			}
 
 			TrackAccel();	// must be called at the end of the periodic loop
