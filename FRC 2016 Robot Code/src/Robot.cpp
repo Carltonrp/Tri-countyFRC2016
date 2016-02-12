@@ -124,6 +124,8 @@ class Robot: public IterativeRobot
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
 
+	DigitalOutput Guide;
+
 
 	Relay	*AR = new Relay(0);
 	Relay	*AL = new Relay(1);
@@ -468,7 +470,7 @@ public:
 				throwHigh.Set((driveStick.GetRawAxis(3)+1)/2);
 				throwLow.Set((driveStick.GetRawAxis(3)+1)/2);
 			}
-			else if (operatorB4.Get())
+			else if (driverB4.Get())
 			{
 				throwHigh.Set(-(driveStick.GetRawAxis(3)+1)/2);
 				throwLow.Set(-(driveStick.GetRawAxis(3)+1)/2);
@@ -478,6 +480,19 @@ public:
 				throwHigh.Set(0);
 				throwLow.Set(0);
 			}
+			if (driverB11.Get())
+			{
+				Guide.Set(1);
+			}
+			else if (driverB12.Get())
+			{
+				Guide.Set(-1);
+			}
+			else
+			{
+				Guide.Set(0);
+			}
+
 			TrackAccel();	// must be called at the end of the periodic loop
 		}
 		else			//Default Tele Code "Both Sticks"
