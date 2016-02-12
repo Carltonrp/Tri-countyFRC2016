@@ -294,7 +294,7 @@ public:
 
 		if(autoSelected == autoNameDefault)
 		{
-			AutoDrive( 2000 , -.2 );
+			AutoDrive( 10000 , -.2 );
 		}
 		else if(autoSelected == autoNameRamparts)
 		{
