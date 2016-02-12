@@ -80,7 +80,6 @@ class Robot: public IterativeRobot
 	std::string autoSelected;
 
 	const std::string teleNameDefault = "BothSticks";
-
 	const std::string teleNameCustom0 = "SingleStick";
 
 	std::string teleSelected;
@@ -293,6 +292,8 @@ public:
 	void AutonomousPeriodic()
 	{
 		aTimer = autoTimer.Get();
+//		std::cout << "times = " << aTimer << std::endl;
+
 
 		if(autoSelected == autoNameDefault)
 		{
@@ -304,11 +305,10 @@ public:
 		}
 		else if(autoSelected == autoNameLowbar)  //Hardwire for lowbar
 		{
-			if ((aTimer > 0) && (aTimer < 5))
+			if ((aTimer > 0) && (aTimer < 8))
 			{
-				std::cout << "times = " << aTimer << std::endl;
-				driveLeft.Set(0.5);
-				driveRight.Set(-0.5);
+				driveLeft.Set(0.25);
+				driveRight.Set(-0.25);
 			}
 			else
 			{
@@ -317,7 +317,15 @@ public:
 		}
 		else if(autoSelected == autoNameRoughTerrain)
 		{
-			KillAll();
+			if ((aTimer > 0) && (aTimer < 10))
+						{
+							driveLeft.Set(0.25);
+							driveRight.Set(-0.25);
+						}
+						else
+						{
+							KillAll();
+						}
 		}
 		else if(autoSelected == autoNameSallyGate)
 		{
@@ -409,6 +417,7 @@ public:
 		teleSelected = *((std::string*)teleChooser->GetSelected());
 		std::string TeleSelected = SmartDashboard::GetString("Tele Selector", teleNameDefault);
 		std::cout << "Tele selected: " << teleSelected << std::endl;
+		KillAll();
 	}
 
 	void TeleopPeriodic()
