@@ -125,6 +125,8 @@ class Robot: public IterativeRobot
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
 
+	Encoder			encoderArm;
+
 	Encoder			encoderLeft;
 	Encoder			encoderRight;
 
@@ -177,6 +179,7 @@ public:
 		teleChooser		( ),
 		accel			( I2C::Port::kOnboard ),
 
+		encoderArm		( 4 , 5 ),
 		encoderLeft		( 6 , 7 ),
 		encoderRight	( 8 , 9 )
 	{}
@@ -505,7 +508,8 @@ public:
 			{
 				guideArmAngle = guideArmAngle-0.05;
 			}
-			guideArm.Set(guideArmAngle);
+			guideArm.Set(driveStick.GetRawAxis(2));
+			std::cout<<guideArmAngle<<std::endl;
 
 			update();	// must be called at the end of the periodic loop
 		}
@@ -795,12 +799,12 @@ public:
 
 	double	AngularDifference	( double left , double right )
 	{
-		std::cout<<"\n";
-		std::cout<<left;
-		std::cout<<"-";
-		std::cout<<right;
-		std::cout<<"=";
-		std::cout<<ModAngle( left - right )<<std::endl;
+//		std::cout<<"\n";
+//		std::cout<<left;
+//		std::cout<<"-";
+//		std::cout<<right;
+//		std::cout<<"=";
+//		std::cout<<ModAngle( left - right )<<std::endl;
 		return ModAngle( left - right );
 	}
 
@@ -836,21 +840,42 @@ public:
 		}
 	}
 
-	/* SENSORS */
+	/* SENSORY */
 
-	double	distanceLeft	=	0;
-	double	distanceRight	=	0;
+	double	distLeft	=	0;
+	double	distRight	=	0;
+	double	posArm		=	0;
+
+	double	speedRight	=	0;
+	double	speedLeft	=	0;
+	double	speedArm	=	0;
+
+	double	accelLeft	=	0;
+	double	accelRight	=	0;
 
 	void	update	()
 	{
 		if ( tracking )
 		{
-			std::cout<<distanceLeft<<"\t"<<distanceRight<<std::endl;
-			distanceLeft	=	encoderLeft.GetDistance();
-			distanceRight	=	encoderRight.GetDistance();
-			double _time	=	timer.Get();
-			acceleration	=	accel.GetY() - ACCEL_CALIBRATION;
-			speed			+=	_time * acceleration;
+			double	_timeElapsed	=	timer.Get();
+
+			double	_newDistLeft	=	encoderLeft.GetDistance();
+			double	_newDistRight	=	encoderRight.GetDistance();
+			double	_newPosArm		=	encoderArm.GetDistance();
+
+			double	_newSpeedLeft	=	(	_newDistLeft	-	distLeft	)	/	_timeElapsed;
+			double	_newSpeedRight	=	(	_newDistRight	-	distRight	)	/	_timeElapsed;
+			speedArm	=	(	_newPosArm	-	posArm	)	/	_timeElapsed;
+
+			accelLeft	=	(	_newDistLeft	-	distLeft	)	/	_timeElapsed;
+			accelRight	=	(	_newDistRight	-	distRight	)	/	_timeElapsed;
+
+			speedLeft	=	_newSpeedLeft;
+			speedRight	=	_newSpeedRight
+
+			distLeft	=	_newDistLeft;
+			distRight	=	_newDistRight;
+
 			timer.Reset();
 		}
 		tracking = true;
