@@ -46,6 +46,7 @@ double	drivePowerLeft					=	0;
 double	drivePowerRight					=	0;
 double	turnPower						=	0;
 double	targetAngle						=	0;
+int 	guideArmAngle					=	0;
 
 int		autoDriveState					=	0;
 double	acceleration					=	0;
@@ -120,11 +121,9 @@ class Robot: public IterativeRobot
 	CANTalon		arm;
 	CANTalon		throwLow;
 	CANTalon		throwHigh;
+	Servo			guideArm;
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
-
-//	DigitalOutput Guide;
-
 
 	Relay	*AR = new Relay(0);
 	Relay	*AL = new Relay(1);
@@ -169,6 +168,7 @@ public:
 		arm				( 4 ),
 		throwHigh		( 3 ),
 		throwLow		( 5 ),
+		guideArm		( 0 ),
 		gyro			( 0 ),
 		autoChooser		( ),
 		teleChooser		( ),
@@ -491,16 +491,13 @@ public:
 			}
 			if (driverB11.Get())
 			{
-//				Guide.Set(1);
+				guideArmAngle = guideArmAngle+0.05;
 			}
 			else if (driverB12.Get())
 			{
-//				Guide.Set(-1);
+				guideArmAngle = guideArmAngle-0.05;
 			}
-			else
-			{
-//				Guide.Set(0);
-			}
+			guideArm.Set(guideArmAngle);
 
 			TrackAccel();	// must be called at the end of the periodic loop
 		}
