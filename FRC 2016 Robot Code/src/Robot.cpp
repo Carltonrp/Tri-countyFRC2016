@@ -452,6 +452,26 @@ public:
 		// Stop all movement and reset PID controls3
 
 		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
+		/*################################################################
+		 * 				Single Stick Control Scheme
+		 * Joystick X and Y axis are movement control
+		 * Buttons:
+		 * 		Trigger- Keep angle
+		 * 		Thumb-	Calibrate
+		 * 		3-
+		 * 		4-
+		 * 		5-
+		 * 		6-
+		 * 		7-
+		 * 		8-
+		 * 		9-
+		 * 		10-
+		 * 		11-
+		 * 		12-
+		 *
+		 *
+		 *################################################################
+		*/
 		{
 //			std::cout<<AngularDifference( 0 , GetAngle() )<<std::endl;
 //			std::cout<<encoderLeft1.Get()<<"\t"<<encoderLeft2.Get()<<std::endl;
@@ -885,7 +905,7 @@ public:
 			accelRight	=	(	_newDistRight	-	distRight	)	/	_timeElapsed;
 
 			speedLeft	=	_newSpeedLeft;
-			speedRight	=	_newSpeedRight
+			speedRight	=	_newSpeedRight;
 
 			distLeft	=	_newDistLeft;
 			distRight	=	_newDistRight;
