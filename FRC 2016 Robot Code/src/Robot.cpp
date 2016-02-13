@@ -548,6 +548,39 @@ public:
 			update();	// must be called at the end of the periodic loop
 		}
 		else			//Default Tele Code "Both Sticks"
+		/*################################################################
+		 * 				Double Stick Control Scheme
+		 * 						Operator Stick
+		 * Joystick  Y- Throw Arm
+		 * Buttons:
+		 * 		3- Throw Ball In
+		 * 		4- Throw Ball Out
+		 * 		5-
+		 * 		6-
+		 * 		7-
+		 * 		8-
+		 * 		9- Servo Guide Arm +
+		 * 		10-Servo Guide Arm -
+		 * 		11- Guide Wheels In
+		 * 		12- Guide Wheels Out
+		 * Throttle: Speed control - Throw Ball +=0
+		 * 						Drive Stick
+		 * Joystick X and Y axis are movement control
+		 * Buttons:
+		 * 		3-
+		 * 		4-
+		 * 		5-
+		 * 		6-
+		 * 		7-
+		 * 		8-
+		 * 		9-
+		 * 		10-
+		 * 		11-
+		 * 		12-
+		 *
+		 *
+		 *################################################################
+		 */
 		{
 			if ( driverThumb.Get() )
 			{
