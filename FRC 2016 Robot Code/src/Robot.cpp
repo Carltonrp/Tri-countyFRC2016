@@ -46,7 +46,11 @@ double	drivePowerLeft					=	0;
 double	drivePowerRight					=	0;
 double	turnPower						=	0;
 double	targetAngle						=	0;
+<<<<<<< HEAD
 int 	launchArmAngle					=	0;
+=======
+double 	guideArmAngle					=	0;
+>>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
 
 int		autoDriveState					=	0;
 double	acceleration					=	0;
@@ -460,17 +464,17 @@ public:
 		 * Buttons:
 		 * 		Trigger- Keep angle
 		 * 		Thumb-	Calibrate
-		 * 		3-
-		 * 		4-
-		 * 		5-
-		 * 		6-
+		 * 		3-	Throw Ball Out
+		 * 		4-	Throw Ball In
+		 * 		5-	Throw Arm Down
+		 * 		6-	Throw Arm Up
 		 * 		7-
 		 * 		8-
-		 * 		9-
-		 * 		10-
-		 * 		11-
-		 * 		12-
-		 *
+		 * 		9-	Servo Control ++
+		 * 		10-	Servo Control --
+		 * 		11-	Guide Wheels In
+		 * 		12-	Guide Wheels Out
+		 * Throttle: Speed control - Throw Ball +=0
 		 *
 		 *################################################################
 		*/
@@ -520,6 +524,7 @@ public:
 			{
 				pitch.Set(-0.5);
 			}
+<<<<<<< HEAD
 			else
 			{
 				pitch.Set(0);
@@ -535,6 +540,11 @@ public:
 			}
 
 			if ( driverB9.Get() )
+=======
+			guideArm.Set(guideArmAngle);
+			std::cout<<guideArmAngle<<std::endl;
+			if (driverB9.Get())
+>>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
 			{
 				ballGuide.Set(1);
 			}
@@ -960,6 +970,12 @@ public:
 			timer.Reset();
 		}
 		tracking = true;
+	}
+	void constrain()
+	{
+
+
+
 	}
 };
 
