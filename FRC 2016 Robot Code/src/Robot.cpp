@@ -46,7 +46,7 @@ double	drivePowerLeft					=	0;
 double	drivePowerRight					=	0;
 double	turnPower						=	0;
 double	targetAngle						=	0;
-int 	guideArmAngle					=	0;
+double 	guideArmAngle					=	0;
 
 int		autoDriveState					=	0;
 double	acceleration					=	0;
@@ -458,17 +458,17 @@ public:
 		 * Buttons:
 		 * 		Trigger- Keep angle
 		 * 		Thumb-	Calibrate
-		 * 		3-
-		 * 		4-
-		 * 		5-
-		 * 		6-
+		 * 		3-	Throw Ball Out
+		 * 		4-	Throw Ball In
+		 * 		5-	Throw Arm Down
+		 * 		6-	Throw Arm Up
 		 * 		7-
 		 * 		8-
-		 * 		9-
-		 * 		10-
-		 * 		11-
-		 * 		12-
-		 *
+		 * 		9-	Servo Control ++
+		 * 		10-	Servo Control --
+		 * 		11-	Guide Wheels In
+		 * 		12-	Guide Wheels Out
+		 * Throttle: Speed control - Throw Ball +=0
 		 *
 		 *################################################################
 		*/
@@ -530,7 +530,7 @@ public:
 			{
 				guideArmAngle = guideArmAngle-0.05;
 			}
-			guideArm.Set(driveStick.GetRawAxis(2));
+			guideArm.Set(guideArmAngle);
 			std::cout<<guideArmAngle<<std::endl;
 			if (driverB9.Get())
 			{
@@ -913,6 +913,12 @@ public:
 			timer.Reset();
 		}
 		tracking = true;
+	}
+	void constrain()
+	{
+
+
+
 	}
 };
 
