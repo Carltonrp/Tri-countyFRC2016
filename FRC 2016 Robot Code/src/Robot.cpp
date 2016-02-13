@@ -46,7 +46,7 @@ double	drivePowerLeft					=	0;
 double	drivePowerRight					=	0;
 double	turnPower						=	0;
 double	targetAngle						=	0;
-int 	guideArmAngle					=	0;
+int 	launchArmAngle					=	0;
 
 int		autoDriveState					=	0;
 double	acceleration					=	0;
@@ -118,11 +118,12 @@ class Robot: public IterativeRobot
 
 	CANTalon		driveLeft;
 	CANTalon		driveRight;
-	CANTalon		arm;
+	CANTalon		pitch;
 	CANTalon		throwLow;
 	CANTalon		throwHigh;
 	CANTalon		ballGuide;
-	Servo			guideArm;
+	Servo			launchArm;
+	Servo			intakeArm;
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
 
@@ -156,7 +157,7 @@ public:
 		driverB12		( &driveStick , 12 ),
 
 		operatorStick	( 1 ),
-		operatorTrigger	( &driveStick , 1 ),
+		operatorTrigger	( &operatorStick , 1 ),
 		operatorThumb	( &operatorStick , 2 ),
 		operatorB3		( &operatorStick , 3 ),
 		operatorB4		( &operatorStick , 4 ),
@@ -171,11 +172,12 @@ public:
 
 		driveLeft		( 1 ),
 		driveRight		( 2 ),
-		arm				( 4 ),
+		pitch			( 4 ),
 		throwHigh		( 3 ),
 		throwLow		( 5 ),
 		ballGuide		( 6	),
-		guideArm		( 0 ),
+		launchArm		( 0 ),
+		intakeArm		( 1 ),
 		gyro			( 0 ),
 		autoChooser		( ),
 		teleChooser		( ),
@@ -489,30 +491,17 @@ public:
 				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
 			}
 
-			if ( driveStick.GetPOV() != -1 )
-			{
-				targetAngle = ModAngle( -driveStick.GetPOV() );
-			}
+//			if ( driveStick.GetPOV() != -1 )
+//			{
+//				targetAngle = ModAngle( -driveStick.GetPOV() );
+//			}
 
-			if (driverB5.Get())
-			{
-				arm.Set(0.5);
-			}
-			else if (driverB6.Get())
-			{
-				arm.Set(-0.5);
-			}
-			else
-			{
-				arm.Set(0);
-			}
-
-			if (driverB3.Get())
+			if ( driverB3.Get() )
 			{
 				throwHigh.Set((driveStick.GetRawAxis(3)+1)/2);
 				throwLow.Set((driveStick.GetRawAxis(3)+1)/2);
 			}
-			else if (driverB4.Get())
+			else if ( driverB4.Get() )
 			{
 				throwHigh.Set(-(driveStick.GetRawAxis(3)+1)/2);
 				throwLow.Set(-(driveStick.GetRawAxis(3)+1)/2);
@@ -522,21 +511,34 @@ public:
 				throwHigh.Set(0);
 				throwLow.Set(0);
 			}
-			if (driverB11.Get())
+
+			if (driverB5.Get())
 			{
-				guideArmAngle = guideArmAngle+0.05;
+				pitch.Set(0.5);
 			}
-			else if (driverB12.Get())
+			else if (driverB6.Get())
 			{
-				guideArmAngle = guideArmAngle-0.05;
+				pitch.Set(-0.5);
 			}
-			guideArm.Set(driveStick.GetRawAxis(2));
-			std::cout<<guideArmAngle<<std::endl;
-			if (driverB9.Get())
+			else
+			{
+				pitch.Set(0);
+			}
+
+			if ( driverB7.Get() )
+			{
+				intakeArm.Set(0.75);
+			}
+			else if ( driverB8.Get() )
+			{
+				intakeArm.Set(0);
+			}
+
+			if ( driverB9.Get() )
 			{
 				ballGuide.Set(1);
 			}
-			else if(driverB10.Get())
+			else if( driverB10.Get() )
 			{
 				ballGuide.Set(-1);
 			}
@@ -544,6 +546,18 @@ public:
 			{
 				ballGuide.Set(0);
 			}
+
+			if ( driverB11.Get() )
+			{
+				launchArmAngle = launchArmAngle+0.05;
+			}
+			else if ( driverB12.Get() )
+			{
+				launchArmAngle = launchArmAngle-0.05;
+			}
+
+			launchArm.Set( 1 - driveStick.GetRawAxis(2) );
+			std::cout<<launchArmAngle<<std::endl;
 
 			update();	// must be called at the end of the periodic loop
 		}
@@ -598,16 +612,16 @@ public:
 
 			if (operatorB5.Get())
 			{
-				arm.Set(0.5);
+				pitch.Set(0.5);
 			}
 
 			else if (operatorB6.Get())
 			{
-				arm.Set(-0.5);
+				pitch.Set(-0.5);
 			}
 			else
 			{
-				arm.Set(0);
+				pitch.Set(0);
 			}
 
 			if (operatorB3.Get())
@@ -652,7 +666,7 @@ public:
 		throwHigh.Set	(	0	);
 		throwLow.Set	(	0	);
 
-		arm.Set			(	0	);
+		pitch.Set			(	0	);
 	}
 
 	/* Unconditionally stop all drive motors and reset drive control variables.
@@ -890,22 +904,22 @@ public:
 	}
 
 	/* THROWER CONTROL FUNCTIONS */
-	void	setPitch	( double _target )
-	{
-		if ( _target >= 0 && _target <= 80 )
-		{
-			double _deviation = pitch - _target;
-			pitchP	=	_deviation;
-			pitchI	+=	_deviation;
-			pitchD	=	pitchSpeed;
-			arm.Set( PITCH_K * ( PITCH_P_GAIN * pitchP + PITCH_I_GAIN * pitchI + PITCH_D_GAIN * pitchD ) );
-		}
-		else
-		{
-			arm.Set( 0 );
-			std::cout<<"error in 'setPitch': target out of range";
-		}
-	}
+//	void	setPitch	( double _target )
+//	{
+//		if ( _target >= 0 && _target <= 80 )
+//		{
+//			double _deviation = pitch - _target;
+//			pitchP	=	_deviation;
+//			pitchI	+=	_deviation;
+//			pitchD	=	pitchSpeed;
+//			pitch.Set( PITCH_K * ( PITCH_P_GAIN * pitchP + PITCH_I_GAIN * pitchI + PITCH_D_GAIN * pitchD ) );
+//		}
+//		else
+//		{
+//			pitch.Set( 0 );
+//			std::cout<<"error in 'setPitch': target out of range";
+//		}
+//	}
 
 	/* SENSORY */
 
