@@ -121,6 +121,7 @@ class Robot: public IterativeRobot
 	CANTalon		arm;
 	CANTalon		throwLow;
 	CANTalon		throwHigh;
+	CANTalon		ballGuide;
 	Servo			guideArm;
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
@@ -168,6 +169,7 @@ public:
 		arm				( 4 ),
 		throwHigh		( 3 ),
 		throwLow		( 5 ),
+		ballGuide		( 6	),
 		guideArm		( 0 ),
 		gyro			( 0 ),
 		autoChooser		( ),
@@ -498,6 +500,18 @@ public:
 				guideArmAngle = guideArmAngle-0.05;
 			}
 			guideArm.Set(guideArmAngle);
+			if (driverB9.Get())
+			{
+				ballGuide.Set(1);
+			}
+			else if(driverB10.Get())
+			{
+				ballGuide.Set(-1);
+			}
+			else
+			{
+				ballGuide.Set(0);
+			}
 
 			TrackAccel();	// must be called at the end of the periodic loop
 		}
