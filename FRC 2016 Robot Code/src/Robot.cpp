@@ -126,6 +126,11 @@ class Robot: public IterativeRobot
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
 
+	Encoder			encoderArm;
+
+	Encoder			encoderLeft;
+	Encoder			encoderRight;
+
 	Relay	*AR = new Relay(0);
 	Relay	*AL = new Relay(1);
 	DoubleSolenoid	*Piston = new DoubleSolenoid(0, 1);
@@ -174,7 +179,11 @@ public:
 		gyro			( 0 ),
 		autoChooser		( ),
 		teleChooser		( ),
-		accel			( I2C::Port::kOnboard )
+		accel			( I2C::Port::kOnboard ),
+
+		encoderArm		( 4 , 5 ),
+		encoderLeft		( 6 , 7 ),
+		encoderRight	( 8 , 9 )
 	{}
 
 	void RobotInit()
@@ -381,7 +390,7 @@ public:
 //			std::cout<<"\t dist = ";
 //			std::cout<<distance;
 
-			TrackAccel();
+			update();	// must be called at the end of the periodic loop
 		}
 
 //		TankDrive(gyro.GetAngle()/90,0);
@@ -407,7 +416,7 @@ public:
 //		std::cout<< "\trate = ";
 //		std::cout<< gyro.GetRate();
 
-		TrackAccel();	// must be called at the end of the periodic loop
+		update();	// must be called at the end of the periodic loop
 	}
 
 	void TeleopInit()
@@ -444,7 +453,9 @@ public:
 
 		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
 		{
-			std::cout<<AngularDifference( 0 , GetAngle() )<<std::endl;
+//			std::cout<<AngularDifference( 0 , GetAngle() )<<std::endl;
+//			std::cout<<encoderLeft1.Get()<<"\t"<<encoderLeft2.Get()<<std::endl;
+
 			if ( driverThumb.Get() )
 			{
 				KillDrive();
@@ -499,7 +510,8 @@ public:
 			{
 				guideArmAngle = guideArmAngle-0.05;
 			}
-			guideArm.Set(guideArmAngle);
+			guideArm.Set(driveStick.GetRawAxis(2));
+			std::cout<<guideArmAngle<<std::endl;
 			if (driverB9.Get())
 			{
 				ballGuide.Set(1);
@@ -513,7 +525,7 @@ public:
 				ballGuide.Set(0);
 			}
 
-			TrackAccel();	// must be called at the end of the periodic loop
+			update();	// must be called at the end of the periodic loop
 		}
 		else			//Default Tele Code "Both Sticks"
 		{
@@ -561,7 +573,7 @@ public:
 				throwLow.Set(0);
 			}
 
-				TrackAccel();	// must be called at the end of the periodic loop
+			update();	// must be called at the end of the periodic loop
 			}
 	}
 
@@ -728,7 +740,7 @@ public:
 		}
 		if ( autoDriveState == 1 )
 		{
-			TrackAccel();
+			update();
 			double	distanceRemaining	=	_targetDistance - distance;
 			//
 			if ( distanceRemaining < 0 )
@@ -801,12 +813,12 @@ public:
 
 	double	AngularDifference	( double left , double right )
 	{
-		std::cout<<"\n";
-		std::cout<<left;
-		std::cout<<"-";
-		std::cout<<right;
-		std::cout<<"=";
-		std::cout<<ModAngle( left - right )<<std::endl;
+//		std::cout<<"\n";
+//		std::cout<<left;
+//		std::cout<<"-";
+//		std::cout<<right;
+//		std::cout<<"=";
+//		std::cout<<ModAngle( left - right )<<std::endl;
 		return ModAngle( left - right );
 	}
 
@@ -818,24 +830,12 @@ public:
 		turnInterval	=	0;
 	}
 
-	/* ACCELEROMETER FUNCTIONS */
+	/* ENCODER FUNCTIONS */
 	void	DistanceReset	()
 	{
 		distance	=	0;
 	}
 
-	void	TrackAccel	()
-	{
-		if ( tracking )
-		{
-			double _time = timer.Get();
-			acceleration	=	accel.GetY() - ACCEL_CALIBRATION;
-			speed			+=	_time * acceleration;
-			distance		+=	_time * speed;
-			timer.Reset();
-		}
-		tracking = true;
-	}
 	/* THROWER CONTROL FUNCTIONS */
 	void	setPitch	( double _target )
 	{
@@ -852,6 +852,47 @@ public:
 			arm.Set( 0 );
 			std::cout<<"error in 'setPitch': target out of range";
 		}
+	}
+
+	/* SENSORY */
+
+	double	distLeft	=	0;
+	double	distRight	=	0;
+	double	posArm		=	0;
+
+	double	speedRight	=	0;
+	double	speedLeft	=	0;
+	double	speedArm	=	0;
+
+	double	accelLeft	=	0;
+	double	accelRight	=	0;
+
+	void	update	()
+	{
+		if ( tracking )
+		{
+			double	_timeElapsed	=	timer.Get();
+
+			double	_newDistLeft	=	encoderLeft.GetDistance();
+			double	_newDistRight	=	encoderRight.GetDistance();
+			double	_newPosArm		=	encoderArm.GetDistance();
+
+			double	_newSpeedLeft	=	(	_newDistLeft	-	distLeft	)	/	_timeElapsed;
+			double	_newSpeedRight	=	(	_newDistRight	-	distRight	)	/	_timeElapsed;
+			speedArm	=	(	_newPosArm	-	posArm	)	/	_timeElapsed;
+
+			accelLeft	=	(	_newDistLeft	-	distLeft	)	/	_timeElapsed;
+			accelRight	=	(	_newDistRight	-	distRight	)	/	_timeElapsed;
+
+			speedLeft	=	_newSpeedLeft;
+			speedRight	=	_newSpeedRight
+
+			distLeft	=	_newDistLeft;
+			distRight	=	_newDistRight;
+
+			timer.Reset();
+		}
+		tracking = true;
 	}
 };
 
