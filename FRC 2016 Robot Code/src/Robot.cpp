@@ -478,17 +478,17 @@ public:
 //			std::cout<<AngularDifference( 0 , GetAngle() )<<std::endl;
 //			std::cout<<encoderLeft1.Get()<<"\t"<<encoderLeft2.Get()<<std::endl;
 
-			if ( driverThumb.Get() )
+			if (	driverThumb.Get()	)
 			{
 				KillDrive();
 			}
-			else if ( driverTrigger.Get() )
+			else if (	driverTrigger.Get()	)
 			{
-				KeepAngle( 0 , driveStick.GetRawAxis(1) );
+				KeepAngle(	0	,	driveStick.GetRawAxis(1)	);
 			}
 			else
 			{
-				TankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
+				TankDrive(	driveStick.GetRawAxis(0)	,	driveStick.GetRawAxis(1)	);
 			}
 
 //			if ( driveStick.GetPOV() != -1 )
@@ -496,15 +496,15 @@ public:
 //				targetAngle = ModAngle( -driveStick.GetPOV() );
 //			}
 
-			if ( driverB3.Get() )
+			if (	driverB3.Get()	)
 			{
-				throwHigh.Set((driveStick.GetRawAxis(3)+1)/2);
-				throwLow.Set((driveStick.GetRawAxis(3)+1)/2);
+				throwHigh.Set(	(driveStick.GetRawAxis(3)+1)/2);
+				throwLow.Set(	(driveStick.GetRawAxis(3)+1)/2);
 			}
-			else if ( driverB4.Get() )
+			else if (	driverB4.Get()	)
 			{
-				throwHigh.Set(-(driveStick.GetRawAxis(3)+1)/2);
-				throwLow.Set(-(driveStick.GetRawAxis(3)+1)/2);
+				throwHigh.Set(	-(driveStick.GetRawAxis(3)+1)/2	);
+				throwLow.Set(	-(driveStick.GetRawAxis(3)+1)/2	);
 			}
 			else
 			{
@@ -512,47 +512,51 @@ public:
 				throwLow.Set(0);
 			}
 
-			if (driverB5.Get())
+			if (	driverB5.Get()	)
 			{
-				pitch.Set(0.5);
+				pitch.Set(	0.5	);
 			}
-			else if (driverB6.Get())
+			else if (	driverB6.Get()	)
 			{
-				pitch.Set(-0.5);
-			}
-
-			if ( driverB7.Get() )
-			{
-				intakeArm.Set(0.75);
-			}
-			else if ( driverB8.Get() )
-			{
-				intakeArm.Set(0);
-			}
-
-			if ( driverB9.Get() )
-			{
-				intakeRollers.Set(1);
-			}
-			else if( driverB10.Get() )
-			{
-				intakeRollers.Set(-1);
+				pitch.Set(	-0.5	);
 			}
 			else
 			{
-				intakeRollers.Set(0);
+				pitch.Set(	0	);
 			}
 
-			if ( driverB11.Get() )
+			if (	driverB7.Get()	)
 			{
-				launchArmAngle = launchArmAngle+0.05;
+				intakeArm.Set(	0.75	);
 			}
-			else if ( driverB12.Get() )
+			else if (	driverB8.Get()	)
 			{
-				launchArmAngle = launchArmAngle-0.05;
+				intakeArm.Set(	0	);
 			}
 
-			launchArm.Set( 1 - driveStick.GetRawAxis(2) );
+			if (	driverB9.Get()	)
+			{
+				intakeRollers.Set(	1	);
+			}
+			else if(	driverB10.Get()	)
+			{
+				intakeRollers.Set(	-1	);
+			}
+			else
+			{
+				intakeRollers.Set(	0	);
+			}
+
+			if (	driverB11.Get()	)
+			{
+				launchArmAngle	=	launchArmAngle	+	0.05;
+			}
+			else if (	driverB12.Get()	)
+			{
+				launchArmAngle	=	launchArmAngle	-	0.05;
+			}
+
+			launchArm.Set(	1	-	driveStick.GetRawAxis(2)	);
 			std::cout<<launchArmAngle<<std::endl;
 
 			update();	// must be called at the end of the periodic loop
