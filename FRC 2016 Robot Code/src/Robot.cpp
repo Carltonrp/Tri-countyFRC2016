@@ -46,7 +46,6 @@ double	drivePowerLeft					=	0;
 double	drivePowerRight					=	0;
 double	turnPower						=	0;
 double	targetAngle						=	0;
-int 	launchArmAngle					=	0;
 
 int		autoDriveState					=	0;
 double	acceleration					=	0;
@@ -475,8 +474,7 @@ public:
 		 *################################################################
 		*/
 		{
-//			std::cout<<AngularDifference( 0 , GetAngle() )<<std::endl;
-//			std::cout<<encoderLeft1.Get()<<"\t"<<encoderLeft2.Get()<<std::endl;
+			double	driverThrottle	=	1 - operatorStick.GetRawAxis(3);
 
 			if (	driverThumb.Get()	)
 			{
@@ -484,17 +482,17 @@ public:
 			}
 			else if (	driverTrigger.Get()	)
 			{
-				KeepAngle(	0	,	driveStick.GetRawAxis(1)	);
+				KeepAngle(	0	,	driverThrottle * driveStick.GetRawAxis(1)	);
 			}
 			else
 			{
-				TankDrive(	driveStick.GetRawAxis(0)	,	driveStick.GetRawAxis(1)	);
+				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
 			}
 
-//			if ( driveStick.GetPOV() != -1 )
-//			{
-//				targetAngle = ModAngle( -driveStick.GetPOV() );
-//			}
+			//			if ( driveStick.GetPOV() != -1 )
+			//			{
+			//				targetAngle = ModAngle( -driveStick.GetPOV() );
+			//			}
 
 			if (	driverB3.Get()	)
 			{
@@ -547,92 +545,71 @@ public:
 				intakeRollers.Set(	0	);
 			}
 
-			if (	driverB11.Get()	)
+			if (	driverB12.Get()	)
 			{
-				launchArmAngle	=	launchArmAngle	+	0.05;
+				launchArm.Set(	1	);
 			}
-			else if (	driverB12.Get()	)
+			else if (	driverB11.Get()	)
 			{
-				launchArmAngle	=	launchArmAngle	-	0.05;
+
+				launchArm.Set(	0.5	);
 			}
-
-			launchArm.Set(	1	-	driveStick.GetRawAxis(2)	);
-			std::cout<<launchArmAngle<<std::endl;
-
-			update();	// must be called at the end of the periodic loop
 		}
 		else			//Default Tele Code "Both Sticks"
 		/*################################################################
 		 * 				Double Stick Control Scheme
 		 * 						Operator Stick
-		 * Joystick  Y- Throw Arm
-		 * Buttons:
-		 * 		3- Throw Ball In
-		 * 		4- Throw Ball Out
-		 * 		5-
-		 * 		6-
-		 * 		7-
-		 * 		8-
-		 * 		9- Servo Guide Arm +
-		 * 		10-Servo Guide Arm -
-		 * 		11- Guide Wheels In
-		 * 		12- Guide Wheels Out
-		 * Throttle: Speed control - Throw Ball +=0
+		 *	Joystick:
+		 * 		X
+		 * 		Y	Throw Arm
+		 * 		Z
+		 *	Buttons:
+		 * 		3	Throw Ball In
+		 * 		4	Throw Ball Out
+		 * 		5
+		 * 		6
+		 * 		7
+		 * 		8
+		 * 		9	Servo Guide Arm +
+		 * 		10	Servo Guide Arm -
+		 * 		11	Guide Wheels In
+		 * 		12	Guide Wheels Out
+		 *	Throttle: Speed control - Throw Ball +=0
 		 * 						Drive Stick
-		 * Joystick X and Y axis are movement control
-		 * Buttons:
-		 * 		3-
-		 * 		4-
-		 * 		5-
-		 * 		6-
-		 * 		7-
-		 * 		8-
-		 * 		9-
-		 * 		10-
-		 * 		11-
-		 * 		12-
+		 *	Joystick:
+		 *		X	Turn Left/Right
+		 *		Y	Forward/Backward
+		 *		Z
+		 *	Buttons:
+		 * 		3
+		 * 		4
+		 * 		5
+		 * 		6
+		 * 		7
+		 * 		8
+		 * 		9
+		 * 		10
+		 * 		11
+		 * 		12
 		 *
 		 *
 		 *################################################################
 		 */
 		{
-			if ( driverThumb.Get() )
-			{
-				KillDrive();
-			}
-			else
-			{
-				SmoothTankDrive( driveStick.GetRawAxis(0) , driveStick.GetRawAxis(1) );
-			}
 
-			if ( driveStick.GetPOV() != -1 )
-			{
-				targetAngle = ModAngle( -driveStick.GetPOV() );
-			}
+			/*	OPERATOR	*/
 
-			if (operatorB5.Get())
-			{
-				pitch.Set(0.5);
-			}
+			double	operatorThrottle	=	1 - operatorStick.GetRawAxis(3);
 
-			else if (operatorB6.Get())
+			if (	driverB3.Get()	)
 			{
-				pitch.Set(-0.5);
+				throwHigh.Set(	operatorThrottle );
+				throwLow.Set(	operatorThrottle );
 			}
-			else
+			else if (	driverB4.Get()	)
 			{
-				pitch.Set(0);
-			}
-
-			if (operatorB3.Get())
-			{
-				throwHigh.Set((operatorStick.GetRawAxis(3)+1)/2);
-				throwLow.Set((operatorStick.GetRawAxis(3)+1)/2);
-			}
-			else if (operatorB4.Get())
-			{
-				throwHigh.Set(-(operatorStick.GetRawAxis(3)+1)/2);
-				throwLow.Set(-(operatorStick.GetRawAxis(3)+1)/2);
+				throwHigh.Set(	operatorThrottle	);
+				throwLow.Set(	operatorThrottle	);
 			}
 			else
 			{
@@ -640,8 +617,57 @@ public:
 				throwLow.Set(0);
 			}
 
-			update();	// must be called at the end of the periodic loop
+			pitch.Set(	operatorStick.GetRawAxis(1)	);
+
+			if (	operatorTrigger.Get()	)
+			{
+				launchArm.Set(	1	);
 			}
+			else
+			{
+				launchArm.Set(	0.5	);
+			}
+
+			/*	DRIVER	*/
+
+			double	driverThrottle	=	1 - operatorStick.GetRawAxis(3);
+
+			if (	driverThumb.Get()	)
+			{
+				KillDrive();
+			}
+			else if (	driverTrigger.Get()	)
+			{
+				KeepAngle(	0	,	driverThrottle * driveStick.GetRawAxis(1)	);
+			}
+			else
+			{
+				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
+			}
+
+			if (	driverB7.Get()	)
+			{
+				intakeArm.Set(	0.75	);
+			}
+			else if (	driverB8.Get()	)
+			{
+				intakeArm.Set(	0	);
+			}
+
+			if (	driverB9.Get()	)
+			{
+				intakeRollers.Set(	1	);
+			}
+			else if(	driverB10.Get()	)
+			{
+				intakeRollers.Set(	-1	);
+			}
+			else
+			{
+				intakeRollers.Set(	0	);
+			}
+		}
+		update();	// must be called at the end of the periodic loop
 	}
 
 	void TestPeriodic()
