@@ -552,7 +552,7 @@ public:
 			else if (	driverB11.Get()	)
 			{
 
-				launchArm.Set(	0.5	);
+				launchArm.Set(	0.75	);
 			}
 		}
 		else			//Default Tele Code "Both Sticks"
@@ -625,7 +625,7 @@ public:
 			}
 			else
 			{
-				launchArm.Set(	0.5	);
+				launchArm.Set(	0.75	);
 			}
 
 			/*	DRIVER	*/
