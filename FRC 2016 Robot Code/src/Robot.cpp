@@ -563,22 +563,26 @@ public:
 		 * 		X
 		 * 		Y	Throw Arm
 		 * 		Z
+		 * 	POV:
+		 *
 		 *	Buttons:
-		 * 		3	Throw Ball In
-		 * 		4	Throw Ball Out
+		 *		Trigger	Launch
+		 *		Thumb	SPIN LAUNCH WHEELS OUT
+		 * 		3		SPIN INTAKE ROLLERS IN
+		 * 		4		spin intake rollers out
 		 * 		5
-		 * 		6
+		 * 		6		spin launch wheels in
 		 * 		7
 		 * 		8
-		 * 		9	Servo Guide Arm +
-		 * 		10	Servo Guide Arm -
-		 * 		11	Guide Wheels In
-		 * 		12	Guide Wheels Out
-		 *	Throttle: Speed control - Throw Ball +=0
+		 * 		9
+		 * 		10
+		 * 		11
+		 * 		12
+		 *	Throttle: Drive speed control
 		 * 						Drive Stick
 		 *	Joystick:
-		 *		X	Turn Left/Right
-		 *		Y	Forward/Backward
+		 *		X		Turn Left/Right
+		 *		Y		Forward/Backward
 		 *		Z
 		 *	Buttons:
 		 * 		3
@@ -601,22 +605,6 @@ public:
 
 			double	operatorThrottle	=	1 - operatorStick.GetRawAxis(3);
 
-			if (	driverB3.Get()	)
-			{
-				throwHigh.Set(	operatorThrottle );
-				throwLow.Set(	operatorThrottle );
-			}
-			else if (	driverB4.Get()	)
-			{
-				throwHigh.Set(	operatorThrottle	);
-				throwLow.Set(	operatorThrottle	);
-			}
-			else
-			{
-				throwHigh.Set(0);
-				throwLow.Set(0);
-			}
-
 			pitch.Set(	operatorStick.GetRawAxis(1)	);
 
 			if (	operatorTrigger.Get()	)
@@ -626,6 +614,26 @@ public:
 			else
 			{
 				launchArm.Set(	0.5	);
+			}
+
+			if (	operatorThumb.Get()	)
+			{
+				throwHigh.Set(	operatorThrottle );
+				throwLow.Set(	operatorThrottle );
+			}
+			else
+			{
+				throwHigh.Set(0);
+				throwLow.Set(0);
+			}
+
+			if (	operatorB5.Get()	)
+			{
+				intakeArm.Set(	0.75	);
+			}
+			else if (	operatorB6.Get()	)
+			{
+				intakeArm.Set(	0	);
 			}
 
 			/*	DRIVER	*/
@@ -643,15 +651,6 @@ public:
 			else
 			{
 				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
-			}
-
-			if (	driverB7.Get()	)
-			{
-				intakeArm.Set(	0.75	);
-			}
-			else if (	driverB8.Get()	)
-			{
-				intakeArm.Set(	0	);
 			}
 
 			if (	driverB9.Get()	)
