@@ -80,7 +80,7 @@ class Robot: public IterativeRobot
 	std::string autoSelected;
 
 	const std::string teleNameDefault = "BothSticks";
-	const std::string teleNameCustom0 = "SingleStick";
+	const std::string teleNameSingle = "SingleStick";
 
 	std::string teleSelected;
 
@@ -133,7 +133,7 @@ class Robot: public IterativeRobot
 
 	Relay	*AR = new Relay(0);
 	Relay	*AL = new Relay(1);
-	DoubleSolenoid	*Piston = new DoubleSolenoid(0, 1);
+//	DoubleSolenoid	*Piston = new DoubleSolenoid(0, 1);
 
 //	const char *JAVA = "/usr/local/frc/JRE/bin/java";
 //	char *GRIP_ARGS[5] = {"java", "-jar", "/home/lvuser/grip.jar", "/home/lvuser/project.grip", NULL };
@@ -204,7 +204,7 @@ public:
 
 		teleChooser = new SendableChooser();
 		teleChooser->AddDefault(teleNameDefault, (void*)&teleNameDefault);
-		teleChooser->AddObject(teleNameCustom0, (void*)&teleNameCustom0);
+		teleChooser->AddObject(teleNameSingle, (void*)&teleNameSingle);
 
 		SmartDashboard::PutData("Tele Modes", teleChooser);
 
@@ -248,7 +248,7 @@ public:
 	 */
 	void AutonomousInit()
 	{
-		Piston->Set(DoubleSolenoid::Value::kOff);
+//		Piston->Set(DoubleSolenoid::Value::kOff);
 		AR->Set(Relay::Value::kOn);
 		AL->Set(Relay::Value::kOff);
 		autoTimer.Reset();
@@ -452,7 +452,7 @@ public:
 
 		// Stop all movement and reset PID controls3
 
-		if (teleSelected == teleNameCustom0) 	//Single Stick Debug Tele
+		if (teleSelected == teleNameSingle) 	//Single Stick Debug Tele
 		/*################################################################
 		 * 				Single Stick Control Scheme
 		 * Joystick X and Y axis are movement control
@@ -467,7 +467,7 @@ public:
 		 * 		8-
 		 * 		9-	Servo Control ++
 		 * 		10-	Servo Control --
-		 * 		11-	Guide Wheels In
+		 * 		11-	Intake Belts In
 		 * 		12-	Guide Wheels Out
 		 * Throttle: Speed control - Throw Ball +=0
 		 *
@@ -558,27 +558,7 @@ public:
 		else			//Default Tele Code "Both Sticks"
 		/*################################################################
 		 * 				Double Stick Control Scheme
-		 * 						Operator Stick
-		 *	Joystick:
-		 * 		X
-		 * 		Y	Throw Arm
-		 * 		Z
-		 * 	POV:
 		 *
-		 *	Buttons:
-		 *		Trigger	Launch
-		 *		Thumb	SPIN LAUNCH WHEELS OUT
-		 * 		3		SPIN INTAKE ROLLERS IN
-		 * 		4		spin intake rollers out
-		 * 		5
-		 * 		6		spin launch wheels in
-		 * 		7
-		 * 		8
-		 * 		9
-		 * 		10
-		 * 		11
-		 * 		12
-		 *	Throttle: Drive speed control
 		 * 						Drive Stick
 		 *	Joystick:
 		 *		X		Turn Left/Right
@@ -591,6 +571,27 @@ public:
 		 * 		6
 		 * 		7
 		 * 		8
+		 * 		9 		Intake Belts in
+		 * 		10
+		 * 		11
+		 * 		12
+		 * 	Throttle: Drive speed control
+		 *						Operator Stick
+		 *	Joystick:
+		 * 		X
+		 * 		Y	Throw Arm
+		 * 		Z
+		 * 	POV:
+		 *
+		 *	Buttons:
+		 *		Trigger	Launch
+		 *		Thumb	Throwing wheels out
+		 * 		3		Intake in
+		 * 		4		Intake Out
+		 * 		5
+		 * 		6		Throwing wheels in
+		 * 		7
+		 * 		8
 		 * 		9
 		 * 		10
 		 * 		11
@@ -600,6 +601,35 @@ public:
 		 *################################################################
 		 */
 		{
+			/*	DRIVER	*/
+
+			double	driverThrottle	=	1 - operatorStick.GetRawAxis(3);
+
+			if (	driverThumb.Get()	)
+			{
+				KillDrive();
+			}
+			else if (	driverTrigger.Get()	)
+			{
+				KeepAngle(	0	,	driverThrottle * driveStick.GetRawAxis(1)	);
+			}
+			else
+			{
+				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
+			}
+
+			if (	driverB9.Get()	)
+			{
+				intakeRollers.Set(	1	);
+			}
+			else if(	driverB10.Get()	)
+			{
+				intakeRollers.Set(	-1	);
+			}
+			else
+			{
+				intakeRollers.Set(	0	);
+			}
 
 			/*	OPERATOR	*/
 
@@ -636,35 +666,7 @@ public:
 				intakeArm.Set(	0	);
 			}
 
-			/*	DRIVER	*/
 
-			double	driverThrottle	=	1 - operatorStick.GetRawAxis(3);
-
-			if (	driverThumb.Get()	)
-			{
-				KillDrive();
-			}
-			else if (	driverTrigger.Get()	)
-			{
-				KeepAngle(	0	,	driverThrottle * driveStick.GetRawAxis(1)	);
-			}
-			else
-			{
-				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
-			}
-
-			if (	driverB9.Get()	)
-			{
-				intakeRollers.Set(	1	);
-			}
-			else if(	driverB10.Get()	)
-			{
-				intakeRollers.Set(	-1	);
-			}
-			else
-			{
-				intakeRollers.Set(	0	);
-			}
 		}
 		update();	// must be called at the end of the periodic loop
 	}
