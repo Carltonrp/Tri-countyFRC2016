@@ -46,11 +46,7 @@ double	drivePowerLeft					=	0;
 double	drivePowerRight					=	0;
 double	turnPower						=	0;
 double	targetAngle						=	0;
-<<<<<<< HEAD
 int 	launchArmAngle					=	0;
-=======
-double 	guideArmAngle					=	0;
->>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
 
 int		autoDriveState					=	0;
 double	acceleration					=	0;
@@ -125,7 +121,7 @@ class Robot: public IterativeRobot
 	CANTalon		pitch;
 	CANTalon		throwLow;
 	CANTalon		throwHigh;
-	CANTalon		ballGuide;
+	CANTalon		intakeRollers;
 	Servo			launchArm;
 	Servo			intakeArm;
 	AnalogGyro		gyro;
@@ -179,7 +175,7 @@ public:
 		pitch			( 4 ),
 		throwHigh		( 3 ),
 		throwLow		( 5 ),
-		ballGuide		( 6	),
+		intakeRollers		( 6	),
 		launchArm		( 0 ),
 		intakeArm		( 1 ),
 		gyro			( 0 ),
@@ -524,11 +520,6 @@ public:
 			{
 				pitch.Set(-0.5);
 			}
-<<<<<<< HEAD
-			else
-			{
-				pitch.Set(0);
-			}
 
 			if ( driverB7.Get() )
 			{
@@ -540,21 +531,16 @@ public:
 			}
 
 			if ( driverB9.Get() )
-=======
-			guideArm.Set(guideArmAngle);
-			std::cout<<guideArmAngle<<std::endl;
-			if (driverB9.Get())
->>>>>>> branch 'master' of https://github.com/Carltonrp/GitTesting.git
 			{
-				ballGuide.Set(1);
+				intakeRollers.Set(1);
 			}
 			else if( driverB10.Get() )
 			{
-				ballGuide.Set(-1);
+				intakeRollers.Set(-1);
 			}
 			else
 			{
-				ballGuide.Set(0);
+				intakeRollers.Set(0);
 			}
 
 			if ( driverB11.Get() )
