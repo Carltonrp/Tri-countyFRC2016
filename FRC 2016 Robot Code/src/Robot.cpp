@@ -434,13 +434,6 @@ public:
 
 	void TeleopPeriodic()
 	{
-//		std::cout<< "\ndist = ";
-//		std::cout<< distance;
-//		std::cout<< "\tspeed = ";
-//		std::cout<< speed;
-//		std::cout<< "\taccel = ";
-//		std::cout<< accel.GetY();
-
 //		std::cout<< "\nangle = ";
 //		std::cout<< gyro.GetAngle();
 //		std::cout<< "\tP = ";
@@ -450,7 +443,7 @@ public:
 //		std::cout<< "\tD = ";
 //		std::cout<< (int) turnD;
 
-		// Stop all movement and reset PID controls3
+		std::cout<<encoderLeft.Get()<<"\t"<<encoderRight.Get()<<std::endl;
 
 		if (teleSelected == teleNameSingle) 	//Single Stick Debug Tele
 		/*################################################################
