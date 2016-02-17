@@ -9,6 +9,11 @@ const double	DRIVE_DEADZONE			=	0.05;
 const double	DRIVE_X_TOLERANCE		=	0.05;
 const double	ANGLE_TOLERANCE			=	0.1;
 
+const double	DRIVE_P_GAINT			=	1;
+const double	DRIVE_I_GAINT			=	0.05;
+const double	DRIVE_D_GAINT			=	2.0;
+const double	DRIVE_K					=	0.01;
+
 const double	TURN_P_GAIN				=	1.0;
 const double	TURN_I_GAIN				=	0.05;
 const double	TURN_D_GAIN				=	2.0;
@@ -24,6 +29,13 @@ const double	PITCH_D_GAIN			=	2;
 const double	PITCH_K					=	0.001;
 
 double	ACCEL_CALIBRATION				=	0;
+
+//	Movement Tracking
+double	WHEEL_DIAMETER					=	0.079121;
+int		ENCODER_SLOTS					=	96;
+
+double	distLeft						=	0;
+double	distRight						=	0;
 
 double	speedLeft						=	0;
 double	speedRight						=	0;
@@ -52,6 +64,8 @@ double	acceleration					=	0;
 double	speed							=	0;
 double	distance						=	0;
 bool	tracking						=	false;
+
+int		autoState						=	0;
 
 double times;
 double aTimer;
@@ -230,6 +244,9 @@ public:
 
 		gyro.Calibrate();
 
+		encoderLeft.SetDistancePerPulse(	(double)	M_PI	*	WHEEL_DIAMETER	/	ENCODER_SLOTS	);
+		encoderRight.SetDistancePerPulse(	(double)	M_PI	*	WHEEL_DIAMETER	/	ENCODER_SLOTS	);
+
 		CameraServer::GetInstance()->SetQuality(50);
 		CameraServer::GetInstance()->StartAutomaticCapture("cam0");
 
@@ -295,7 +312,6 @@ public:
 			KillAll();
 		}
 		else
-
 		{
 			KillAll();
 		}
@@ -357,7 +373,57 @@ public:
 		}
 		else if(autoSelected == autoNameRockWall)
 		{
-			KillAll();
+			switch ( autoState )
+			case 0:
+			{
+				ResetEncoders();
+			}
+			break;
+			case 1:
+			{
+				if ( AutoDrive( 3 , 0.5 ) ) autoState++;
+			}
+			break;
+			case 2:
+			{
+				KillDrive();
+				if ( encoderLeft.GetStopped() && encoderRight.GetStopped() )
+				{
+					ResetEncoders();
+					autoState++;
+				}
+			}
+			break;
+			case 3:
+			{
+				if ( AutoDrive( 2 , 0.1 ) ) autoState++;
+			}
+			break;
+			case 4:
+			{
+				KillDrive();
+				if ( encoderLeft.GetStopped() && encoderRight.GetStopped() )
+				{
+					ResetEncoders();
+					autoState++;
+				}
+			}
+			break;
+			case 5:
+			{
+				if ( AutoDrive( 3 , 0.5 ) ) autoState++;
+			}
+			break;
+			case 6:
+			{
+				KillDrive();
+				if ( encoderLeft.GetStopped() && encoderRight.GetStopped() )
+				{
+					ResetEncoders();
+					autoState++;
+				}
+			}
+			break;
 		}
 		else
 		{
@@ -391,7 +457,7 @@ public:
 //			std::cout<<"\t dist = ";
 //			std::cout<<distance;
 
-			update();	// must be called at the end of the periodic loop
+			Update();	// must be called at the end of the periodic loop
 		}
 
 //		TankDrive(gyro.GetAngle()/90,0);
@@ -417,7 +483,7 @@ public:
 //		std::cout<< "\trate = ";
 //		std::cout<< gyro.GetRate();
 
-		update();	// must be called at the end of the periodic loop
+		Update();	// must be called at the end of the periodic loop
 	}
 
 	void TeleopInit()
@@ -443,7 +509,7 @@ public:
 //		std::cout<< "\tD = ";
 //		std::cout<< (int) turnD;
 
-		std::cout<<encoderLeft.Get()<<"\t"<<encoderRight.Get()<<std::endl;
+		std::cout<<"LD:\t"<<encoderLeft.Get()<<"\tRD:\t"<<encoderRight.Get()<<std::endl;
 
 		if (teleSelected == teleNameSingle) 	//Single Stick Debug Tele
 		/*################################################################
@@ -663,7 +729,7 @@ public:
 
 
 		}
-		update();	// must be called at the end of the periodic loop
+		Update();	// must be called at the end of the periodic loop
 	}
 
 	void TestPeriodic()
@@ -786,104 +852,47 @@ public:
 
 	void	SpecialTankDrive	( double _x , double _y )
 	{
-		if ( fabs( _x ) <= DRIVE_X_TOLERANCE || driveStick.GetTrigger() )
-		{
-			std::cout<<"\nSTRAIGHT DRIVE!";
-			if ( !driveStraight )
-			{
-				gyro.Reset();
-				TurnPIDReset();
-			}
-			if ( fabs( _x ) <= DRIVE_DEADZONE && fabs( _y ) <= DRIVE_DEADZONE )
-			{
-				driveStraight = false;
-				Drive( 0 , 0 );
-			}
-			else
-			{
-				driveStraight = true;
-				KeepAngle( 0 , _y );
-				driveStraight = true;
-				KeepAngle( 0 , _y );
-			}
-		}
-		else
-		{
-			std::cout<<"\nSMOOTH DRIVE!";
-			driveStraight = false;
-			SmoothDrive( _y - _x , _y + _x );
-		}
+
 	}
 
 	/*
 	 * Automatically drive straight for a specified distance.
 	 */
-	bool	AutoDrive	( double _targetDistance , double _speed = 0.5 )
+	bool	AutoDrive	( double _targetDistance , double _drivePower = 0.5 )
 	{
-		if ( autoDriveState == 0 )
+		switch ( autoDriveState )
+		case 0:
 		{
 			gyro.Reset();
-			TurnPIDReset();
-			DistanceReset();
-			autoDriveState = 1;
+			autoDriveState++;
+			return	false;
 		}
-		if ( autoDriveState == 1 )
+		break;
+		case 1:
 		{
-			update();
-			double	distanceRemaining	=	_targetDistance - distance;
-			//
-			if ( distanceRemaining < 0 )
+			if ( distMin	<	_targetDistance )
 			{
-				// if facing correct angle,
 				if ( fabs( GetAngle() ) <= ANGLE_TOLERANCE )
 				{
-					// drive straight
-					KeepAngle( 0 , _speed );
+					KeepAngle( 0 , _drivePower );
 				}
 				else
 				{
-					// stop to correct angle
-					KeepAngle( 0 , 0 );
-				}
-			}
-			else if ( distanceRemaining > 0 )
-			{
-				// if facing correct angle,
-				if ( fabs( GetAngle() ) <= ANGLE_TOLERANCE )
-				{
-					// drive straight
-					KeepAngle( 0 , _speed );
-				}
-				else
-				{
-					// stop to correct angle
 					KeepAngle( 0 , 0 );
 				}
 			}
 			else
 			{
-				autoDriveState = 2;
+				KillDrive();
+				autoDriveState++;
 			}
+			return	false;
 		}
-		if ( autoDriveState == 2 )
+		case 2:
 		{
-			// if not facing the correct angle
-			if ( fabs( GetAngle() ) > ANGLE_TOLERANCE )
-			{
-				// turn to face the correct angle
-				KeepAngle( 0 , 0 );
-			}
-			else
-			{
-				autoDriveState = -1;
-			}
+			autoDriveState	=	0;
+			return	true;
 		}
-		if ( autoDriveState == -1 )
-		{
-			autoDriveState = 0;
-			return true;
-		}
-		else return false;
 	}
 
 	/* GYRO FUNCTIONS */
@@ -920,10 +929,6 @@ public:
 	}
 
 	/* ENCODER FUNCTIONS */
-	void	DistanceReset	()
-	{
-		distance	=	0;
-	}
 
 	/* THROWER CONTROL FUNCTIONS */
 //	void	setPitch	( double _target )
@@ -945,49 +950,40 @@ public:
 
 	/* SENSORY */
 
+	double	zeroLeft	=	0;
+	double	zeroRight	=	0;
+
 	double	distLeft	=	0;
 	double	distRight	=	0;
+	double	distMin		=	0;
 	double	posArm		=	0;
 
 	double	speedRight	=	0;
 	double	speedLeft	=	0;
 	double	speedArm	=	0;
 
-	double	accelLeft	=	0;
-	double	accelRight	=	0;
-
-	void	update	()
+	void	Update	()
 	{
 		if ( tracking )
 		{
 			double	_timeElapsed	=	timer.Get();
 
-			double	_newDistLeft	=	encoderLeft.GetDistance();
-			double	_newDistRight	=	encoderRight.GetDistance();
-			double	_newPosArm		=	encoderArm.GetDistance();
+			distLeft	=	encoderLeft.GetDistance()	-	zeroLeft;
+			distRight	=	encoderRight.GetDistance()	-	zeroRight;
+			distMin		=	fminf( distLeft , distRight );
 
-			double	_newSpeedLeft	=	(	_newDistLeft	-	distLeft	)	/	_timeElapsed;
-			double	_newSpeedRight	=	(	_newDistRight	-	distRight	)	/	_timeElapsed;
-			speedArm	=	(	_newPosArm	-	posArm	)	/	_timeElapsed;
-
-			accelLeft	=	(	_newDistLeft	-	distLeft	)	/	_timeElapsed;
-			accelRight	=	(	_newDistRight	-	distRight	)	/	_timeElapsed;
-
-			speedLeft	=	_newSpeedLeft;
-			speedRight	=	_newSpeedRight;
-
-			distLeft	=	_newDistLeft;
-			distRight	=	_newDistRight;
+			speedLeft	=	encoderLeft.GetRate();
+			speedRight	=	encoderLeft.GetRate();
 
 			timer.Reset();
 		}
 		tracking = true;
 	}
-	void constrain()
+
+	void ResetEncoders()
 	{
-
-
-
+		zeroLeft	=	encoderLeft.GetDistance();
+		zeroRight	=	encoderRight.GetDistance();
 	}
 };
 
