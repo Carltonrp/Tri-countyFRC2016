@@ -330,14 +330,14 @@ public:
 		else if(autoSelected == autoNameRoughTerrain)
 		{
 			if ((aTimer > 0) && (aTimer < 10))
-			{
-				driveLeft.Set(0.25);
-				driveRight.Set(-0.25);
-			}
-			else
-			{
-				KillAll();
-			}
+						{
+							driveLeft.Set(0.25);
+							driveRight.Set(-0.25);
+						}
+						else
+						{
+							KillAll();
+						}
 		}
 		else if(autoSelected == autoNameSallyGate)
 		{
@@ -558,9 +558,7 @@ public:
 		 *		Y		Forward/Backward
 		 *		Z
 		 *	Buttons:
-		 *		Trigger
-		 *		Thumb	Intake Belts in
-		 * 		3		Intake Belts out
+		 * 		3
 		 * 		4
 		 * 		5
 		 * 		6
@@ -568,29 +566,29 @@ public:
 		 * 		8
 		 * 		9
 		 * 		10
-		 * 		11
-		 * 		12
+		 * 		11		intake wheels out
+		 * 		12		INTAKE WHEELS IN
 		 * 	Throttle: Drive speed control
 		 *						Operator Stick
 		 *	Joystick:
 		 * 		X
-		 * 		Y	Throw Arm
+		 * 		Y		Control Pitch
 		 * 		Z
 		 * 	POV:
 		 *
 		 *	Buttons:
 		 *		Trigger	Launch
-		 *		Thumb	Throwing wheels out
-		 * 		3		Intake in
-		 * 		4		Intake Out
+		 *		Thumb	THROWING WHEELS OUT
+		 * 		3		INTAKE WHEELS IN
+		 * 		4		intake wheels out
 		 * 		5
-		 * 		6		Throwing wheels in
+		 * 		6		throwing wheels in
 		 * 		7
 		 * 		8
 		 * 		9
 		 * 		10
-		 * 		11
-		 * 		12
+		 * 		11		toggle intake arm off
+		 * 		12		TOGGLE INTAKE ARM ON
 		 *
 		 *
 		 *################################################################
@@ -613,11 +611,11 @@ public:
 				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
 			}
 
-			if (	driverThumb.Get	)
+			if (	driverB12.Get()	)
 			{
 				intakeRollers.Set(	1	);
 			}
-			else if(	driverB3.Get()	)
+			else if(	driverB11.Get()	)
 			{
 				intakeRollers.Set(	-1	);
 			}
@@ -652,11 +650,11 @@ public:
 				throwLow.Set(0);
 			}
 
-			if (	operatorB5.Get()	)
+			if (	operatorB12.Get()	)
 			{
 				intakeArm.Set(	0.75	);
 			}
-			else if (	operatorB6.Get()	)
+			else if (	operatorB11.Get()	)
 			{
 				intakeArm.Set(	0	);
 			}
