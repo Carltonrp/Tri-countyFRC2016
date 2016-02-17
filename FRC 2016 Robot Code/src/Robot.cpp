@@ -330,14 +330,14 @@ public:
 		else if(autoSelected == autoNameRoughTerrain)
 		{
 			if ((aTimer > 0) && (aTimer < 10))
-						{
-							driveLeft.Set(0.25);
-							driveRight.Set(-0.25);
-						}
-						else
-						{
-							KillAll();
-						}
+			{
+				driveLeft.Set(0.25);
+				driveRight.Set(-0.25);
+			}
+			else
+			{
+				KillAll();
+			}
 		}
 		else if(autoSelected == autoNameSallyGate)
 		{
@@ -558,13 +558,15 @@ public:
 		 *		Y		Forward/Backward
 		 *		Z
 		 *	Buttons:
-		 * 		3
+		 *		Trigger
+		 *		Thumb	Intake Belts in
+		 * 		3		Intake Belts out
 		 * 		4
 		 * 		5
 		 * 		6
 		 * 		7
 		 * 		8
-		 * 		9 		Intake Belts in
+		 * 		9
 		 * 		10
 		 * 		11
 		 * 		12
@@ -611,11 +613,11 @@ public:
 				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
 			}
 
-			if (	driverB9.Get()	)
+			if (	driverThumb.Get	)
 			{
 				intakeRollers.Set(	1	);
 			}
-			else if(	driverB10.Get()	)
+			else if(	driverB3.Get()	)
 			{
 				intakeRollers.Set(	-1	);
 			}
