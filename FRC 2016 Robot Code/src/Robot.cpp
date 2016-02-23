@@ -74,6 +74,8 @@ double accelX;
 double accelY;
 double accelZ;
 
+bool	intake	=	false;
+
 class Robot: public IterativeRobot
 {
 	LiveWindow	*lw = LiveWindow::GetInstance();
@@ -135,8 +137,10 @@ class Robot: public IterativeRobot
 	CANTalon		throwLow;
 	CANTalon		throwHigh;
 	CANTalon		intakeRollers;
+	CANTalon		intakeArm;
 	Servo			launchArm;
-	Servo			intakeArm;
+	Talon			doorArmA;
+	Talon			doorArmB;
 	AnalogGyro		gyro;
 	ADXL345_I2C		accel;
 
@@ -145,8 +149,15 @@ class Robot: public IterativeRobot
 	Encoder			encoderLeft;
 	Encoder			encoderRight;
 
+	DigitalInput	intakeClosed;
+	DigitalInput	intakeOpen;
+	DigitalInput	pitchDown;
+
 	Relay	*AR = new Relay(0);
 	Relay	*AL = new Relay(1);
+
+	USBCamera Cam;
+
 //	DoubleSolenoid	*Piston = new DoubleSolenoid(0, 1);
 
 //	const char *JAVA = "/usr/local/frc/JRE/bin/java";
@@ -188,9 +199,11 @@ public:
 		pitch			( 4 ),
 		throwHigh		( 3 ),
 		throwLow		( 5 ),
-		intakeRollers		( 6	),
+		intakeRollers	( 6	),
 		launchArm		( 0 ),
-		intakeArm		( 1 ),
+		intakeArm		( 7 ),
+		doorArmA		( 1 ),
+		doorArmB		( 2 ),
 		gyro			( 0 ),
 		autoChooser		( ),
 		teleChooser		( ),
@@ -198,7 +211,12 @@ public:
 
 		encoderArm		( 4 , 5 ),
 		encoderLeft		( 6 , 7 ),
-		encoderRight	( 8 , 9 )
+		encoderRight	( 8 , 9 ),
+
+		intakeClosed	( 0 ),
+		intakeOpen		( 1 ),
+		pitchDown		( 2 ),
+		Cam("cam0", TRUE)
 	{}
 
 	void RobotInit()
@@ -235,12 +253,12 @@ public:
 
 		timer.Start();
 
-		for ( int n = 0 ; n < 256 ; n++ )
-		{
-			Wait(0.1);
-			ACCEL_CALIBRATION	+=	accel.GetY();
-		}
-		ACCEL_CALIBRATION	/=	256;
+//		for ( int n = 0 ; n < 256 ; n++ )
+//		{
+//			Wait(0.1);
+//			ACCEL_CALIBRATION	+=	accel.GetY();
+//		}
+//		ACCEL_CALIBRATION	/=	256;
 
 		gyro.Calibrate();
 
@@ -249,6 +267,7 @@ public:
 
 		CameraServer::GetInstance()->SetQuality(50);
 		CameraServer::GetInstance()->StartAutomaticCapture("cam0");
+		Cam.SetExposureAuto();
 
 
 	}
@@ -373,57 +392,15 @@ public:
 		}
 		else if(autoSelected == autoNameRockWall)
 		{
-			switch ( autoState )
-			case 0:
+			if ((aTimer > 0) && (aTimer < 3.25))
 			{
-				ResetEncoders();
+				driveLeft.Set(0.75);
+				driveRight.Set(-0.75);
 			}
-			break;
-			case 1:
+			else
 			{
-				if ( AutoDrive( 3 , 0.5 ) ) autoState++;
+				KillAll();
 			}
-			break;
-			case 2:
-			{
-				KillDrive();
-				if ( encoderLeft.GetStopped() && encoderRight.GetStopped() )
-				{
-					ResetEncoders();
-					autoState++;
-				}
-			}
-			break;
-			case 3:
-			{
-				if ( AutoDrive( 2 , 0.1 ) ) autoState++;
-			}
-			break;
-			case 4:
-			{
-				KillDrive();
-				if ( encoderLeft.GetStopped() && encoderRight.GetStopped() )
-				{
-					ResetEncoders();
-					autoState++;
-				}
-			}
-			break;
-			case 5:
-			{
-				if ( AutoDrive( 3 , 0.5 ) ) autoState++;
-			}
-			break;
-			case 6:
-			{
-				KillDrive();
-				if ( encoderLeft.GetStopped() && encoderRight.GetStopped() )
-				{
-					ResetEncoders();
-					autoState++;
-				}
-			}
-			break;
 		}
 		else
 		{
@@ -490,7 +467,7 @@ public:
 	{
 		AL->Set(Relay::Value::kOn);
 		AR->Set(Relay::Value::kOff);
-		gyro.Calibrate();
+//		gyro.Calibrate();
 
 		teleSelected = *((std::string*)teleChooser->GetSelected());
 		std::string TeleSelected = SmartDashboard::GetString("Tele Selector", teleNameDefault);
@@ -500,6 +477,7 @@ public:
 
 	void TeleopPeriodic()
 	{
+		Cam.SetExposureAuto();
 //		std::cout<< "\nangle = ";
 //		std::cout<< gyro.GetAngle();
 //		std::cout<< "\tP = ";
@@ -509,7 +487,7 @@ public:
 //		std::cout<< "\tD = ";
 //		std::cout<< (int) turnD;
 
-		std::cout<<"LD:\t"<<encoderLeft.Get()<<"\tRD:\t"<<encoderRight.Get()<<std::endl;
+//		std::cout<<"LD:\t"<<encoderLeft.Get()<<"\tRD:\t"<<encoderRight.Get()<<std::endl;
 
 		if (teleSelected == teleNameSingle) 	//Single Stick Debug Tele
 		/*################################################################
@@ -618,25 +596,8 @@ public:
 		/*################################################################
 		 * 				Double Stick Control Scheme
 		 *
-		 * 						Drive Stick
-		 *	Joystick:
-		 *		X		Turn Left/Right
-		 *		Y		Forward/Backward
-		 *		Z
-		 *	Buttons:
-		 * 		3
-		 * 		4
-		 * 		5
-		 * 		6
-		 * 		7
-		 * 		8
-		 * 		9
-		 * 		10
-		 * 		11		intake wheels out
-		 * 		12		INTAKE WHEELS IN
-		 * 	Throttle: Drive speed control
-		 *						Operator Stick
-		 *	Joystick:
+		 * 					Operator Stick
+		 *  Joystick:
 		 * 		X
 		 * 		Y		Control Pitch
 		 * 		Z
@@ -656,54 +617,44 @@ public:
 		 * 		11		toggle intake arm off
 		 * 		12		TOGGLE INTAKE ARM ON
 		 *
+		 * 						Drive Stick
+		 *	Joystick:
+		 *		X		Turn Left/Right
+		 *		Y		Forward/Backward
+		 *		Z
+		 *	Buttons:
+		 * 		3
+		 * 		4
+		 * 		5
+		 * 		6
+		 * 		7
+		 * 		8
+		 * 		9
+		 * 		10
+		 * 		11		intake wheels out
+		 * 		12		INTAKE WHEELS IN
+		 * 	Throttle: Drive speed control
+		 *
 		 *
 		 *################################################################
 		 */
 		{
-			/*	DRIVER	*/
-
-			double	driverThrottle	=	1 - operatorStick.GetRawAxis(3);
-
-			if (	driverThumb.Get()	)
-			{
-				KillDrive();
-			}
-			else if (	driverTrigger.Get()	)
-			{
-				KeepAngle(	0	,	driverThrottle * driveStick.GetRawAxis(1)	);
-			}
-			else
-			{
-				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
-			}
-
-			if (	driverB12.Get()	)
-			{
-				intakeRollers.Set(	1	);
-			}
-			else if(	driverB11.Get()	)
-			{
-				intakeRollers.Set(	-1	);
-			}
-			else
-			{
-				intakeRollers.Set(	0	);
-			}
-
+			std::cout<<intakeClosed.Get()<<std::endl;
 			/*	OPERATOR	*/
 
 			double	operatorThrottle	=	1 - operatorStick.GetRawAxis(3);
 
-			pitch.Set(	operatorStick.GetRawAxis(1)	);
+			pitch.Set(	-operatorStick.GetRawAxis(1)	);
 
-			if (	operatorTrigger.Get()	)
-			{
-				launchArm.Set(	1	);
-			}
-			else
-			{
-				launchArm.Set(	0.5	);
-			}
+			launchArm.Set(	0.1	);
+//			if (	operatorTrigger.Get()	)
+//			{
+//				launchArm.Set(	0.7	);
+//			}
+//			else
+//			{
+//				launchArm.Set(	0.1	);
+//			}
 
 			if (	operatorThumb.Get()	)
 			{
@@ -716,16 +667,92 @@ public:
 				throwLow.Set(0);
 			}
 
-			if (	operatorB12.Get()	)
+			if (	operatorB5.Get()	)
 			{
-				intakeArm.Set(	0.75	);
+				intake	=	true;
 			}
-			else if (	operatorB11.Get()	)
+			else if (	operatorB3.Get()	)
 			{
+				intake	=	false;
+			}
+			if (operatorB9.Get())
+			{
+				doorArmA.Set(0.5);
+			}
+			else if (operatorB10.Get())
+			{
+				doorArmA.Set(-0.5);
+			}
+			else
+			{
+				doorArmA.Set(0);
+			}
+			if (operatorB7.Get())
+			{
+				doorArmB.Set(0.5);
+			}
+			else if (operatorB8.Get())
+			{
+				doorArmB.Set(-0.5);
+			}
+			else
+			{
+				doorArmB.Set(0);
+			}
+
+			/*	DRIVER	*/
+
+			double	driverThrottle	=	1;
+
+			if (	driverB12.Get()	)
+			{
+				KillDrive();
+			}
+			else
+			{
+				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
+			}
+
+			if (	driverThumb.Get()	)
+			{
+				intakeRollers.Set(	-1	);
+			}
+			else if (	driverB3.Get()	)
+			{
+				intakeRollers.Set(	1	);
+			}
+			else
+			{
+				intakeRollers.Set(	0	);
+			}
+
+			if (	driverThumb.Get()	)
+			{
+				intake	=	true;
+			}
+
+			/* Both */
+
+			if (	operatorTrigger.Get()	)
+			{
+				std::cout<<"FIRING"<<std::endl;
+				intakeArm.Set(	1.0	);
+			}
+			else if (	!intake	&&	!intakeClosed.Get()	)
+			{
+				std::cout<<"CLOSING"<<std::endl;
+				intakeArm.Set(	0.15	);
+			}
+			else if (	!intakeOpen.Get()	)
+			{
+//				std::cout<<"OPENING"<<std::endl;
+				intakeArm.Set(	-0.25	);
+			}
+			else
+			{
+//				std::cout<<"STOPPED"<<std::endl;
 				intakeArm.Set(	0	);
 			}
-
-
 		}
 		Update();	// must be called at the end of the periodic loop
 	}
@@ -859,6 +886,7 @@ public:
 	bool	AutoDrive	( double _targetDistance , double _drivePower = 0.5 )
 	{
 		switch ( autoDriveState )
+		{
 		case 0:
 		{
 			gyro.Reset();
@@ -885,11 +913,12 @@ public:
 				autoDriveState++;
 			}
 			return	false;
-		}
+		}break;
 		case 2:
 		{
 			autoDriveState	=	0;
 			return	true;
+		}break;
 		}
 	}
 
