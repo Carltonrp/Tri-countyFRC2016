@@ -366,8 +366,8 @@ public:
 		{
 			if ((aTimer > 0) && (aTimer < 10))
 						{
-							driveLeft.Set(0.25);
-							driveRight.Set(-0.25);
+							driveLeft.Set(0.50);
+							driveRight.Set(-0.50);
 						}
 						else
 						{
@@ -646,20 +646,15 @@ public:
 
 			pitch.Set(	-operatorStick.GetRawAxis(1)	);
 
-			launchArm.Set(	0.1	);
-//			if (	operatorTrigger.Get()	)
-//			{
-//				launchArm.Set(	0.7	);
-//			}
-//			else
-//			{
-//				launchArm.Set(	0.1	);
-//			}
-
 			if (	operatorThumb.Get()	)
 			{
 				throwHigh.Set(	operatorThrottle );
 				throwLow.Set(	operatorThrottle );
+			}
+			else if (	operatorB4.Get()	)
+			{
+				throwHigh.Set(	-operatorThrottle	);
+				throwLow.Set(	-operatorThrottle	);
 			}
 			else
 			{
@@ -708,9 +703,27 @@ public:
 			{
 				KillDrive();
 			}
+			else if (	driverB11.Get()	)
+			{
+				if (	driveStraight	)
+				{
+					KeepAngle( 0 , driverThrottle * driveStick.GetRawAxis(1) );
+				}
+				else
+				{
+					gyro.Reset();
+					driveStraight	=	true;
+				}
+			}
 			else
 			{
 				TankDrive(	driverThrottle * driveStick.GetRawAxis(0)	,	driverThrottle * driveStick.GetRawAxis(1)	);
+				driveStraight	=	false;
+			}
+
+			if (	driverB7.Get()	)
+			{
+				gyro.Calibrate();
 			}
 
 			if (	driverThumb.Get()	)
@@ -850,17 +863,23 @@ public:
 
 	void	KeepAngle	( double _targetAngle , double _drive )
 	{
+
+		std::cout<<"angle	=	"<<GetAngle()<<std::endl;
+
 		// calculate angle deviation
 		double _currentAngleDeviation = AngularDifference( _targetAngle , GetAngle() );
-
-		// increment interval
-		turnInterval++;
 
 		// calculate PID
 		turnP	=	_currentAngleDeviation;
 		turnI	+=	_currentAngleDeviation;
 		turnD	=	-gyro.GetRate();
 
+		if (	fabs( _currentAngleDeviation )	<=	ANGLE_TOLERANCE	)
+		{
+			turnI	=	0;
+		}
+
+//		std::cout<<"turnPower	=	"<<turnPower<<std::endl;
 		// calculate turn power
 		turnPower	=	TURN_K * ( TURN_P_GAIN * turnP + TURN_I_GAIN * turnI + TURN_D_GAIN * turnD );
 
