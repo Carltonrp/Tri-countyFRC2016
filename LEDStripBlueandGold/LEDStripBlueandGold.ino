@@ -5,6 +5,7 @@ CRGB leds[NUM_LEDS];
 
 #define DATA_PIN 5
 #define CLOCK_PIN 6
+#define ANALOG_PIN 0
 #define MAX_BRIGHTNESS 200
 int controlPortA = 7;
 int controlPortB = 8;
@@ -455,9 +456,9 @@ void play( int select )
 
 void DrivePower()
 {
-  int DriveP = analogRead(analogPort);
+  int DriveP = analogRead(ANALOG_PIN);
   DriveP = map(DriveP, 0, 1023, 0, 1000);
-  int MaxLed = (NUM_LEDS * DriveP) / 1000;
+  int MaxLed = NUM_LEDS * (DriveP / 1000); 
   Serial.println(MaxLed);
 
   for (int n; n < MaxLed; n++)
