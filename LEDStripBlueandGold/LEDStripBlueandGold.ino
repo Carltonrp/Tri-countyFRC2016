@@ -88,15 +88,15 @@ void shift_down()
 
 void shift_in()
 {
-  for ( int n = 0 ; n < NUM_LEDS/2 ; n++ )
+  for ( int n = 0 ; n < NUM_LEDS / 2 ; n++ )
   {
-    int a = NUM_LEDS/2 + n;
-    int b = NUM_LEDS/2 - n - 1;
-    
+    int a = NUM_LEDS / 2 + n;
+    int b = NUM_LEDS / 2 - n - 1;
+
     leds[a].r = leds[ a + 1 ].r;
     leds[a].g = leds[ a + 1 ].g;
     leds[a].b = leds[ a + 1 ].b;
-    
+
     leds[b].r = leds[ b - 1 ].r;
     leds[b].g = leds[ b - 1 ].g;
     leds[b].b = leds[ b - 1 ].b;
@@ -109,11 +109,11 @@ void shift_out()
   {
     int a = MID_LED + n;
     int b = MID_LED - n;
-    
+
     leds[a].r = leds[ a - 1 ].r;
     leds[a].g = leds[ a - 1 ].g;
     leds[a].b = leds[ a - 1 ].b;
-    
+
     leds[b].r = leds[ b + 1 ].r;
     leds[b].g = leds[ b + 1 ].g;
     leds[b].b = leds[ b + 1 ].b;
@@ -197,13 +197,13 @@ void BlueandGold()
   {
     int a = (NUM_LEDS / 2) - n;
     int b = (NUM_LEDS / 2) + n;
-    
+
     Serial.println(a);
-    
+
     leds[a].r = 255;
     leds[a].g = 255;
     leds[a].b = 0;
-    
+
     leds[b].r = 0;
     leds[b].g = 0;
     leds[b].b = 255;
@@ -217,243 +217,269 @@ void play( int select )
   switch ( select )
   {
     case 0:
-    {
-      for ( int n = 0 ; n < NUM_LEDS ; n++ )
       {
-        leds[n].r = random( 0 , 255 ) ;
-        leds[n].g = random( 0 , 255 ) ;
-        leds[n].b = random( 0 , 255 ) ;
+        for ( int n = 0 ; n < NUM_LEDS ; n++ )
+        {
+          leds[n].r = random( 0 , 255 ) ;
+          leds[n].g = random( 0 , 255 ) ;
+          leds[n].b = random( 0 , 255 ) ;
+        }
+        FastLED.show();
       }
-      FastLED.show();
-    }
-    break;
+      break;
     case 1:
-    {
-      for ( int n = 0 ; n < NUM_LEDS ; n++ )
       {
-        leds[n].r = 255 ;
-        leds[n].g = 255 ;
-        leds[n].b = 0 ;
+        for ( int n = 0 ; n < NUM_LEDS ; n++ )
+        {
+          leds[n].r = 255 ;
+          leds[n].g = 255 ;
+          leds[n].b = 0 ;
+        }
+        FastLED.show();
       }
-      FastLED.show();
-    }
-    break;
+      break;
     case 2:
-    {
-      for ( int n = 0 ; n < NUM_LEDS ; n++ )
       {
-        leds[n].r = 0;
-        leds[n].g = 0;
-        leds[n].b = 255;
+        for ( int n = 0 ; n < NUM_LEDS ; n++ )
+        {
+          leds[n].r = 0;
+          leds[n].g = 0;
+          leds[n].b = 255;
+        }
+        FastLED.show();
       }
-      FastLED.show();
-    }
-    break;
+      break;
     case 3:
-    {
-      int period = 16;
-      leds[0].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[0].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[0].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
-      shift_up();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        int period = 16;
+        leds[0].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[0].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[0].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
+        shift_up();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 4:
-    {
-      int period = 16;
-      leds[NUM_LEDS-1].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[NUM_LEDS-1].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[NUM_LEDS-1].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
-      shift_down();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        int period = 16;
+        leds[NUM_LEDS - 1].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[NUM_LEDS - 1].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[NUM_LEDS - 1].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
+        shift_down();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 5:
-    {
-      int period = 16;
-      leds[NUM_LEDS/2].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[NUM_LEDS/2].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[NUM_LEDS/2].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
-      shift_out();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        int period = 16;
+        leds[NUM_LEDS / 2].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[NUM_LEDS / 2].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[NUM_LEDS / 2].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
+        shift_out();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 6:
-    {
-      int period = 16;
-      leds[0].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[0].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[0].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
-      leds[NUM_LEDS-1].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[NUM_LEDS-1].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
-      leds[NUM_LEDS-1].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
-      shift_in();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        int period = 16;
+        leds[0].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[0].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[0].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
+        leds[NUM_LEDS - 1].r = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[NUM_LEDS - 1].g = 127 * ( 1 + cos( (double) M_PI * tick / period ) ) ;
+        leds[NUM_LEDS - 1].b = 127 * ( 1 + sin( (double) M_PI * tick / period ) ) ;
+        shift_in();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 7:
-    {
-      leds[0].r = random( 0 , 255 ) ;
-      leds[0].g = random( 0 , 255 ) ;
-      leds[0].b = random( 0 , 255 ) ;
-      shift_up();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[0].r = random( 0 , 255 ) ;
+        leds[0].g = random( 0 , 255 ) ;
+        leds[0].b = random( 0 , 255 ) ;
+        shift_up();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 8:
-    {
-      leds[NUM_LEDS].r = random( 0 , 255 ) ;
-      leds[NUM_LEDS].g = random( 0 , 255 ) ;
-      leds[NUM_LEDS].b = random( 0 , 255 ) ;
-      shift_down();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[NUM_LEDS].r = random( 0 , 255 ) ;
+        leds[NUM_LEDS].g = random( 0 , 255 ) ;
+        leds[NUM_LEDS].b = random( 0 , 255 ) ;
+        shift_down();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 9:
-    {
-      leds[NUM_LEDS/2].r = random( 0 , 255 ) ;
-      leds[NUM_LEDS/2].g = random( 0 , 255 ) ;
-      leds[NUM_LEDS/2].b = random( 0 , 255 ) ;
-      shift_out();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[NUM_LEDS / 2].r = random( 0 , 255 ) ;
+        leds[NUM_LEDS / 2].g = random( 0 , 255 ) ;
+        leds[NUM_LEDS / 2].b = random( 0 , 255 ) ;
+        shift_out();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 10:
-    {
-      leds[0].r = random( 0 , 255 ) ;
-      leds[0].g = random( 0 , 255 ) ;
-      leds[0].b = random( 0 , 255 ) ;
-      leds[NUM_LEDS-1].r = random( 0 , 255 ) ;
-      leds[NUM_LEDS-1].g = random( 0 , 255 ) ;
-      leds[NUM_LEDS-1].b = random( 0 , 255 ) ;
-      shift_in();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[0].r = random( 0 , 255 ) ;
+        leds[0].g = random( 0 , 255 ) ;
+        leds[0].b = random( 0 , 255 ) ;
+        leds[NUM_LEDS - 1].r = random( 0 , 255 ) ;
+        leds[NUM_LEDS - 1].g = random( 0 , 255 ) ;
+        leds[NUM_LEDS - 1].b = random( 0 , 255 ) ;
+        shift_in();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 11:
-    {
-      leds[0].r = 0 ;
-      leds[0].g = 0 ;
-      leds[0].b = 255 ;
-      shift_up();
-      FastLED.show();
-      delay(10);
-    }
+      {
+        leds[0].r = 0 ;
+        leds[0].g = 0 ;
+        leds[0].b = 255 ;
+        shift_up();
+        FastLED.show();
+        delay(10);
+      }
     case 12:
-    {
-      leds[0].r = 255 ;
-      leds[0].g = 255 ;
-      leds[0].b = 0 ;
-      shift_up();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[0].r = 255 ;
+        leds[0].g = 255 ;
+        leds[0].b = 0 ;
+        shift_up();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 13:
-    {
-      leds[NUM_LEDS-1].r = 0 ;
-      leds[NUM_LEDS-1].g = 0 ;
-      leds[NUM_LEDS-1].b = 255 ;
-      shift_down();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[NUM_LEDS - 1].r = 0 ;
+        leds[NUM_LEDS - 1].g = 0 ;
+        leds[NUM_LEDS - 1].b = 255 ;
+        shift_down();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 14:
-    {
-      leds[NUM_LEDS-1].r = 255 ;
-      leds[NUM_LEDS-1].g = 255 ;
-      leds[NUM_LEDS-1].b = 0 ;
-      shift_down();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[NUM_LEDS - 1].r = 255 ;
+        leds[NUM_LEDS - 1].g = 255 ;
+        leds[NUM_LEDS - 1].b = 0 ;
+        shift_down();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 15:
-    {
-      leds[NUM_LEDS/2].r = 0 ;
-      leds[NUM_LEDS/2].g = 0 ;
-      leds[NUM_LEDS/2].b = 255 ;
-      shift_out();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[NUM_LEDS / 2].r = 0 ;
+        leds[NUM_LEDS / 2].g = 0 ;
+        leds[NUM_LEDS / 2].b = 255 ;
+        shift_out();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 16:
-    {
-      leds[NUM_LEDS/2].r = 255 ;
-      leds[NUM_LEDS/2].g = 255 ;
-      leds[NUM_LEDS/2].b = 0 ;
-      shift_out();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[NUM_LEDS / 2].r = 255 ;
+        leds[NUM_LEDS / 2].g = 255 ;
+        leds[NUM_LEDS / 2].b = 0 ;
+        shift_out();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 17:
-    {
-      leds[0].r = 0 ;
-      leds[0].g = 0 ;
-      leds[0].b = 255 ;
-      leds[NUM_LEDS-1].r = 0 ;
-      leds[NUM_LEDS-1].g = 0 ;
-      leds[NUM_LEDS-1].b = 255 ;
-      shift_in();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[0].r = 0 ;
+        leds[0].g = 0 ;
+        leds[0].b = 255 ;
+        leds[NUM_LEDS - 1].r = 0 ;
+        leds[NUM_LEDS - 1].g = 0 ;
+        leds[NUM_LEDS - 1].b = 255 ;
+        shift_in();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 18:
-    {
-      leds[0].r = 255 ;
-      leds[0].g = 255 ;
-      leds[0].b = 0 ;
-      leds[NUM_LEDS-1].r = 255 ;
-      leds[NUM_LEDS-1].g = 255 ;
-      leds[NUM_LEDS-1].b = 0 ;
-      shift_in();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[0].r = 255 ;
+        leds[0].g = 255 ;
+        leds[0].b = 0 ;
+        leds[NUM_LEDS - 1].r = 255 ;
+        leds[NUM_LEDS - 1].g = 255 ;
+        leds[NUM_LEDS - 1].b = 0 ;
+        shift_in();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 19:
-    {
-      leds[0].r = 0 ;
-      leds[0].g = 0 ;
-      leds[0].b = 255 ;
-      leds[NUM_LEDS-1].r = 255 ;
-      leds[NUM_LEDS-1].g = 255 ;
-      leds[NUM_LEDS-1].b = 0 ;
-      shift_in();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[0].r = 0 ;
+        leds[0].g = 0 ;
+        leds[0].b = 255 ;
+        leds[NUM_LEDS - 1].r = 255 ;
+        leds[NUM_LEDS - 1].g = 255 ;
+        leds[NUM_LEDS - 1].b = 0 ;
+        shift_in();
+        FastLED.show();
+        delay(10);
+      }
+      break;
     case 20:
-    {
-      leds[0].r = 255 ;
-      leds[0].g = 255 ;
-      leds[0].b = 0 ;
-      leds[NUM_LEDS-1].r = 0 ;
-      leds[NUM_LEDS-1].g = 0 ;
-      leds[NUM_LEDS-1].b = 255 ;
-      shift_in();
-      FastLED.show();
-      delay(10);
-    }
-    break;
+      {
+        leds[0].r = 255 ;
+        leds[0].g = 255 ;
+        leds[0].b = 0 ;
+        leds[NUM_LEDS - 1].r = 0 ;
+        leds[NUM_LEDS - 1].g = 0 ;
+        leds[NUM_LEDS - 1].b = 255 ;
+        shift_in();
+        FastLED.show();
+        delay(10);
+      }
+      break;
   }
 }
 
 void DrivePower()
 {
-  
+  int DriveP = analogRead(analogPort);
+  DriveP = map(DriveP, 0, 1023, 0, 1000);
+  int MaxLed = (NUM_LEDS * DriveP) / 1000;
+  Serial.println(MaxLed);
+
+  for (int n; n < MaxLed; n++)
+  {
+    int ledA = (NUM_LEDS / 2) + n;
+    int ledB = (NUM_LEDS / 2) - n;
+
+    leds[ledA].r = 255;
+    leds[ledA].g = 255;
+    leds[ledA].b = 0;
+
+    leds[ledB].r = 0;
+    leds[ledB].g = 255;
+    leds[ledB].b = 0;
+    FastLED.show();
+  }
+  delay(10);
+  for (int n; n < NUM_LEDS; n++)
+  {
+    leds[n].r = 0;
+    leds[n].g = 0;
+    leds[n].b = 0;
+  }
+  FastLED.show();
 }
