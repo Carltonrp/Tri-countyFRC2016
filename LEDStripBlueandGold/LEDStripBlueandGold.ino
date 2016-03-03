@@ -5,7 +5,7 @@ CRGB leds[NUM_LEDS];
 
 #define DATA_PIN 5
 #define CLOCK_PIN 6
-#define MAX_BRIGHTNESS 200
+#define MAX_BRIGHTNESS 100
 int controlPortA = 7;
 int controlPortB = 8;
 int state = 0;
@@ -216,6 +216,7 @@ void play( int select )
 {
   switch ( select )
   {
+    // instant disco
     case 0:
     {
       for ( int n = 0 ; n < NUM_LEDS ; n++ )
@@ -227,6 +228,7 @@ void play( int select )
       FastLED.show();
     }
     break;
+    // instant yellow
     case 1:
     {
       for ( int n = 0 ; n < NUM_LEDS ; n++ )
@@ -238,6 +240,7 @@ void play( int select )
       FastLED.show();
     }
     break;
+    // instant blue
     case 2:
     {
       for ( int n = 0 ; n < NUM_LEDS ; n++ )
@@ -249,6 +252,7 @@ void play( int select )
       FastLED.show();
     }
     break;
+    // blue/yellow gradient wave up
     case 3:
     {
       int period = 16;
@@ -260,6 +264,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // blue/yellow gradient wave down
     case 4:
     {
       int period = 16;
@@ -271,6 +276,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // blue/yellow gradient wave out
     case 5:
     {
       int period = 16;
@@ -282,6 +288,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // blue/yellow gradient wave in
     case 6:
     {
       int period = 16;
@@ -296,6 +303,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // disco up
     case 7:
     {
       leds[0].r = random( 0 , 255 ) ;
@@ -306,6 +314,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // disco down
     case 8:
     {
       leds[NUM_LEDS].r = random( 0 , 255 ) ;
@@ -316,6 +325,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // disco out
     case 9:
     {
       leds[NUM_LEDS/2].r = random( 0 , 255 ) ;
@@ -326,6 +336,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // disco in
     case 10:
     {
       leds[0].r = random( 0 , 255 ) ;
@@ -339,6 +350,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // blue up
     case 11:
     {
       leds[0].r = 0 ;
@@ -348,6 +360,7 @@ void play( int select )
       FastLED.show();
       delay(10);
     }
+    // yellow up
     case 12:
     {
       leds[0].r = 255 ;
@@ -358,6 +371,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // blue down
     case 13:
     {
       leds[NUM_LEDS-1].r = 0 ;
@@ -368,6 +382,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // yellow down
     case 14:
     {
       leds[NUM_LEDS-1].r = 255 ;
@@ -378,6 +393,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // blue out
     case 15:
     {
       leds[NUM_LEDS/2].r = 0 ;
@@ -388,6 +404,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // yellow out
     case 16:
     {
       leds[NUM_LEDS/2].r = 255 ;
@@ -398,6 +415,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // blue in
     case 17:
     {
       leds[0].r = 0 ;
@@ -411,6 +429,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // yellow in
     case 18:
     {
       leds[0].r = 255 ;
@@ -424,6 +443,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // blue up / yellow down
     case 19:
     {
       leds[0].r = 0 ;
@@ -437,6 +457,7 @@ void play( int select )
       delay(10);
     }
     break;
+    // yellow up / blue down
     case 20:
     {
       leds[0].r = 255 ;
