@@ -42,12 +42,14 @@ void loop()
   }
   else
   {
-    if ( random( 0 , 127 ) == 1 )
-    {
-      shuffle();
-      Serial.print( "\nanimation:\t" ); Serial.print(animation);
-    }
-    play( animation );
+      if ( random( 0 , 127 ) == 1 )
+      {
+        shuffle();
+        Serial.print( "\nanimation:\t" ); Serial.print(animation);
+      }
+      play( animation );
+//    DrivePower();
+
   }
   tick++;
 }
@@ -457,30 +459,43 @@ void play( int select )
 void DrivePower()
 {
   int DriveP = analogRead(ANALOG_PIN);
-  DriveP = map(DriveP, 0, 1023, 0, 1000);
-  int MaxLed = NUM_LEDS * (DriveP / 1000); 
+  int MaxLed = round( NUM_LEDS * (double) DriveP / 2048 );
+  Serial.println("\nMaxLed  ");
   Serial.println(MaxLed);
+  Serial.println("\nDrive P  ");
+  Serial.println(DriveP);
 
-  for (int n; n < MaxLed; n++)
+  for ( int n ; n < NUM_LEDS / 2 ; n++ )
   {
     int ledA = (NUM_LEDS / 2) + n;
     int ledB = (NUM_LEDS / 2) - n;
 
-    leds[ledA].r = 255;
-    leds[ledA].g = 255;
-    leds[ledA].b = 0;
-
-    leds[ledB].r = 0;
-    leds[ledB].g = 255;
-    leds[ledB].b = 0;
-    FastLED.show();
-  }
-  delay(10);
-  for (int n; n < NUM_LEDS; n++)
-  {
-    leds[n].r = 0;
-    leds[n].g = 0;
-    leds[n].b = 0;
+    if ( n <= MaxLed )
+    {
+      leds[ledA].r = 0;
+      leds[ledA].g = 255;
+      leds[ledA].b = 255;
+      leds[ledB].r = 0;
+      leds[ledB].g = 255;
+      leds[ledB].b = 0;
+    }
+    else
+    {
+      leds[ledA].r = 200;
+      leds[ledA].g = 200;
+      leds[ledA].b = 200;
+      leds[ledB].r = 200;
+      leds[ledB].g = 200;
+      leds[ledB].b = 200;
+    }
   }
   FastLED.show();
+  delay(100);
+  //  for (int n = MaxLed; n < NUM_LEDS; n++)
+  //  {
+  //    leds[n].r = 0;
+  //    leds[n].g = 0;
+  //    leds[n].b = 0;
+  //  }
+  //  FastLED.show();
 }
