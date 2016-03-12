@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include "WPILib.h"
 #include "Timer.h"
+//#include "LHSVision.cpp"
 
 const double	SMOOTH_DRIVE_P_GAIN		=	0.5;
 const double	DRIVE_DEADZONE			=	0.05;
@@ -102,7 +103,7 @@ class Robot: public IterativeRobot
 
 	Timer	timer;
 	Timer 	autoTimer;
-//	RobotDrive Robotc;
+	RobotDrive Robotc;
 	Joystick		driveStick;
 	JoystickButton	driverTrigger;
 	JoystickButton	driverThumb;
@@ -156,16 +157,19 @@ class Robot: public IterativeRobot
 	Relay	*AR = new Relay(0);
 	Relay	*AL = new Relay(1);
 
-	USBCamera Cam;
+//	LHSVision* mLHSVision;
 
-//	DoubleSolenoid	*Piston = new DoubleSolenoid(0, 1);
+//	USBCamera Cam0;
+//	USBCamera Cam1;
+
+	DoubleSolenoid	*Piston = new DoubleSolenoid(0, 1);
 
 //	const char *JAVA = "/usr/local/frc/JRE/bin/java";
 //	char *GRIP_ARGS[5] = {"java", "-jar", "/home/lvuser/grip.jar", "/home/lvuser/project.grip", NULL };
 
 public:
 	Robot():
-//		Robotc(1, 2),
+		Robotc(1, 2),
 		driveStick		( 0 ),
 		driverTrigger	( &driveStick , 1 ),
 		driverThumb		( &driveStick , 2 ),
@@ -215,8 +219,10 @@ public:
 
 		intakeClosed	( 0 ),
 		intakeOpen		( 1 ),
-		pitchDown		( 2 ),
-		Cam("cam0", TRUE)
+		pitchDown		( 2 )
+//		mLHSVision ()
+//		Cam0("cam0", TRUE)
+//		Cam1("cam2", TRUE)
 	{}
 
 	void RobotInit()
@@ -243,6 +249,8 @@ public:
 		AR->Set(Relay::Value::kOff);
 		AL->Set(Relay::Value::kOff);
 
+//		mLHSVision = new LHSVision(Robotc, driveStick);
+
 //		if (fork() == 0)						//Creating process for grip and testing if it fails
 //		{
 //			if (execv(JAVA, GRIP_ARGS) == -1)
@@ -267,8 +275,9 @@ public:
 
 		CameraServer::GetInstance()->SetQuality(50);
 		CameraServer::GetInstance()->StartAutomaticCapture("cam0");
-		Cam.SetExposureAuto();
-
+//		CameraServer::GetInstance()->StartAutomaticCapture("cam2");
+//		Cam0.SetExposureAuto();
+//		Cam1.SetExposureAuto();
 
 	}
 
@@ -284,7 +293,7 @@ public:
 	 */
 	void AutonomousInit()
 	{
-//		Piston->Set(DoubleSolenoid::Value::kOff);
+		Piston->Set(DoubleSolenoid::Value::kOff);
 		AR->Set(Relay::Value::kOn);
 		AL->Set(Relay::Value::kOff);
 		autoTimer.Reset();
@@ -352,7 +361,7 @@ public:
 		}
 		else if(autoSelected == autoNameLowbar)  //Hardwire for lowbar
 		{
-			if ((aTimer > 0) && (aTimer < 8))
+			if ((aTimer > 0) && (aTimer < 8.5))
 			{
 				driveLeft.Set(0.25);
 				driveRight.Set(-0.25);
@@ -477,7 +486,9 @@ public:
 
 	void TeleopPeriodic()
 	{
-		Cam.SetExposureAuto();
+
+//		Cam0.SetExposureAuto();
+//		Cam1.SetExposureAuto();
 //		std::cout<< "\nangle = ";
 //		std::cout<< gyro.GetAngle();
 //		std::cout<< "\tP = ";
@@ -488,6 +499,14 @@ public:
 //		std::cout<< (int) turnD;
 
 //		std::cout<<"LD:\t"<<encoderLeft.Get()<<"\tRD:\t"<<encoderRight.Get()<<std::endl;
+
+//		while(IsOperatorControl() && IsEnabled())
+//			{
+//				Robotc->ArcadeDrive(driverStick->GetRawAxis(XBOX::XBOX_LEFT_Y), driverStick->GetRawAxis(XBOX::XBOX_LEFT_X));
+//
+//				mLHSVision->UpdateVision();
+//				Wait(0.02);
+//			}
 
 		if (teleSelected == teleNameSingle) 	//Single Stick Debug Tele
 		/*################################################################
@@ -737,6 +756,14 @@ public:
 			else
 			{
 				intakeRollers.Set(	0	);
+			}
+			if (driverB6.Get())
+			{
+				Piston->Set(DoubleSolenoid::Value::kForward);
+			}
+			if (driverB4.Get())
+			{
+				Piston->Set(DoubleSolenoid::Value::kReverse);
 			}
 
 			if (	driverThumb.Get()	)
